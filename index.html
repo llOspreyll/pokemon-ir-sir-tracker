@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Pokémon Special Art Master Tracker</title>
-<meta name="app-version" content="v9" />
+<meta name="app-version" content="v10" />
 <style>
 :root{
   --bg:#0d1020; --panel:#151a31; --panel2:#1d2442; --ink:#f4f7ff; --muted:#aeb9d9;
@@ -58,26 +58,93 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:25px;border-t
 @media(max-width:760px){.toolbar{grid-template-columns:1fr}.stats{text-align:left}.set-head{align-items:start;flex-direction:column}.counts{justify-content:start}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.dashboard{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.dash-card{padding:11px}.dash-value{font-size:18px}.set-main{align-items:flex-start}.set-logo{width:92px;height:42px}.card{padding:7px;border-radius:12px}.card h3{font-size:13px}.card p{font-size:11px}.rarity-pill{font-size:9px}.owned-toggle{padding:7px 5px}.modal-grid{grid-template-columns:1fr}.modal{padding:14px}.modal img{max-height:58vh;object-fit:contain}.modal h2{font-size:24px}.controls{gap:6px}.sort-select{width:100%}}
 @media print{.toolbar-wrap,.notice,.check,footer{display:none!important}body{background:#fff;color:#111}.hero{padding:20px;border:0}.hero .pokeball{display:none}.subtitle,.set-meta,.card p{color:#555}.set{break-before:page}.card{break-inside:avoid;background:#fff;border:1px solid #ddd;box-shadow:none}.grid{grid-template-columns:repeat(4,1fr);gap:8px}.rarity-pill.ir{color:#8a6500}.rarity-pill.sir{color:#a1265d}.count{background:#fff}.set-head{border-color:#bbb}}
 </style>
+
+<style id="v10-polish">
+:root{--accent:#ff4d5f;--cyan:#38d8ff;--violet:#b45cff}
+body{background:
+ radial-gradient(circle at 85% 2%,rgba(255,77,95,.13),transparent 22%),
+ radial-gradient(circle at 8% 20%,rgba(56,216,255,.07),transparent 25%),#07101d}
+.hero{padding:34px 20px 26px;text-align:left;max-width:1220px;margin:auto;border-bottom:0;position:relative}
+.hero-inner{display:flex;gap:18px;align-items:center}
+.pokeball{width:58px;height:58px;min-width:58px;margin:0}
+h1{font-size:clamp(28px,5vw,46px);line-height:1.03;letter-spacing:-1.4px}
+h1 .accent{color:var(--accent)}
+.subtitle{margin:10px 0 0;max-width:720px;font-size:16px;line-height:1.55}
+.badges{display:none!important}
+.toolbar-wrap{position:relative;top:auto;background:transparent;backdrop-filter:none;border:0}
+.toolbar{display:block;padding:0 16px 14px}
+.search-row{display:flex;gap:8px;margin-bottom:12px}
+input[type=search]{font-size:16px;padding:14px 16px;border-radius:15px;background:#0c1728}
+.controls{gap:8px}
+.controls button{border-radius:999px;padding:10px 14px;background:#0b1626}
+.controls button.active{background:var(--accent);border-color:var(--accent);color:white;box-shadow:0 0 20px rgba(255,77,95,.25)}
+#randomBtn{border-radius:14px;background:linear-gradient(135deg,rgba(255,126,182,.22),rgba(56,216,255,.18));border-color:#516b91}
+.sort-select{border-radius:14px;background:#0b1626}
+.stats{display:none}
+main{padding-top:4px}
+.backup-row{opacity:.8}
+.dashboard{grid-template-columns:repeat(4,minmax(0,1fr));margin-top:4px}
+.dash-card{background:linear-gradient(180deg,#0e1b2e,#0a1423);border-color:#233858;border-radius:18px;padding:16px;text-align:center}
+.dash-label{font-size:12px;letter-spacing:0;text-transform:none}
+.dash-value{font-size:26px}
+.dash-icon{font-size:22px;margin-bottom:4px}
+.set{margin-top:18px}
+.set-head{background:#0b1626;border:1px solid #243958;border-radius:16px;padding:14px;align-items:center}
+.set-body{padding-top:4px}
+.card{background:linear-gradient(180deg,#0e1a2b,#091320);border-color:#213654}
+.card img{background:#060d17}
+.all-random-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:10px 0 14px}
+.all-random-head h2{margin:0;font-size:20px}
+.all-random-head span{color:var(--muted);font-size:12px}
+@media(max-width:760px){
+ .hero{padding:26px 16px 18px}
+ .hero-inner{align-items:flex-start}
+ .pokeball{width:50px;height:50px;min-width:50px}
+ .subtitle{font-size:14px}
+ .controls{display:flex;overflow-x:auto;flex-wrap:nowrap;padding-bottom:6px;scrollbar-width:none}
+ .controls::-webkit-scrollbar{display:none}
+ .controls button{white-space:nowrap;flex:0 0 auto}
+ .sort-select{width:auto;min-width:180px;flex:0 0 auto}
+ .dashboard{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .dash-card{padding:14px 10px}
+ .dash-value{font-size:23px}
+ .backup-row{font-size:11px}
+}
+</style>
+
 </head>
 <body>
 <header class="hero">
-  <div class="pokeball" aria-hidden="true"></div>
-  <h1>Pokémon Special Art Master Tracker</h1>
-  <p class="subtitle">English special-art and chase cards across eras — IR, SIR, Trainer Gallery, Galarian Gallery, Alternate Art Secret, and Gold — grouped by expansion with live card art and collection tracking.</p>
-  <div class="badges"><span class="badge ir">★ IR</span><span class="badge sir">★★ SIR</span><span class="badge">TG</span><span class="badge">GG</span><span class="badge">AAS</span><span class="badge">Gold</span><span class="badge">English TCG</span></div>
+  <div class="hero-inner">
+    <div class="pokeball" aria-hidden="true"></div>
+    <div>
+      <h1>Pokémon <span class="accent">Special Art</span><br>Master Tracker</h1>
+      <p class="subtitle">English special-art and chase cards across eras — grouped by expansion with live card art and collection tracking.</p>
+    </div>
+  </div>
 </header>
 <div class="toolbar-wrap">
   <div class="toolbar">
     <input id="search" type="search" placeholder="Search a card or set…" autocomplete="off" />
     <div class="controls">
-      <button id="allBtn" class="active">All</button><button id="irBtn">IR</button><button id="sirBtn">SIR</button><button id="tgBtn">TG</button><button id="ggBtn">GG</button><button id="aasBtn">Alt Art Secret</button><button id="goldBtn">Gold</button><button id="randomBtn">🎲 Who’s Next?</button>
+      <button id="allBtn" class="active">All</button>
+      <button id="faBtn">Full Art</button>
+      <button id="afaBtn">Alt Full Art</button>
+      <button id="aasBtn">Alt Art Secret</button>
+      <button id="rainbowBtn">Rainbow/Secret</button>
+      <button id="tgBtn">Trainer Gallery</button>
+      <button id="ggBtn">Galarian Gallery</button>
+      <button id="goldBtn">Gold</button>
+      <button id="irBtn">IR</button>
+      <button id="sirBtn">SIR</button>
+      <button id="randomBtn">🎲 Who’s Next?</button>
       <select id="sortSelect" class="sort-select" aria-label="Sort sets"><option value="newest">Newest → Oldest</option><option value="oldest">Oldest → Newest</option><option value="az">Set Name A–Z</option></select>
     </div>
     <div class="stats"><span id="stats">Loading catalog…</span><div class="progress"><span id="overallBar"></span></div></div>
   </div>
 </div>
 <main>
-  <div class="backup-row"><span class="small">Collection saves automatically on this device.</span><div class="actions"><button class="ghost" id="exportBtn">Backup</button><button class="ghost" id="importBtn">Restore</button><input id="importFile" type="file" accept="application/json" hidden></div></div><div id="localWarning" class="notice local-warning"><strong>Local-file mode:</strong> this copy is being opened directly from a file. Some iPhone/iPad browsers block the live card request in this mode. The hosted version uses the same file at a normal HTTPS address and avoids that issue.</div>
+  <div class="backup-row"><span class="small">Owned saves automatically on this device.</span><div class="actions"><button class="ghost" id="exportBtn">Backup</button><button class="ghost" id="importBtn">Restore</button><input id="importFile" type="file" accept="application/json" hidden></div></div><div id="localWarning" class="notice local-warning"><strong>Local-file mode:</strong> this copy is being opened directly from a file. Some iPhone/iPad browsers block the live card request in this mode. The hosted version uses the same file at a normal HTTPS address and avoids that issue.</div>
   <div id="dashboard" class="dashboard" hidden></div>
   <div id="loading" class="loading"><div class="spinner"></div><strong>Building the master catalog…</strong><br><span class="small">Pulling special-art cards, galleries, gold cards, set logos, and release dates.</span></div>
   <div id="app"></div>
@@ -190,7 +257,7 @@ function renderDashboard(){
  const total=state.cards.length,owned=state.cards.filter(c=>isOwned(c.id)).length,pct=total?Math.round(owned/total*100):0;
  const cats=['IR','SIR','TG','GG','AAS','GOLD']; const catText=cats.map(k=>{const a=state.cards.filter(c=>c.categoryCode===k),o=a.filter(c=>isOwned(c.id)).length;return `${k} ${o}/${a.length}`}).join(' · ');
  const sets=new Map();for(const c of state.cards){const k=c.set?.id||c.set?.name;if(!sets.has(k))sets.set(k,[]);sets.get(k).push(c)} const completed=[...sets.values()].filter(cs=>cs.length&&cs.every(c=>isOwned(c.id))).length;
- $('#dashboard').innerHTML=`<div class="dash-card"><div class="dash-label">Collection</div><div class="dash-value">${owned} / ${total}</div><div class="dash-sub">${pct}% complete</div></div><div class="dash-card"><div class="dash-label">By Category</div><div class="dash-value" style="font-size:15px">${catText}</div><div class="dash-sub">owned / total</div></div><div class="dash-card"><div class="dash-label">Completed Sets</div><div class="dash-value">${completed} / ${sets.size}</div><div class="dash-sub">mastered expansions</div></div><div class="dash-card"><div class="dash-label">Tracker Scope</div><div class="dash-value" style="font-size:15px">IR · SIR · TG · GG · AAS · Gold</div><div class="dash-sub">special-art master collection</div></div>`; $('#dashboard').hidden=false;
+ $('#dashboard').innerHTML=`<div class="dash-card"><div class="dash-label">Owned</div><div class="dash-value">${owned} / ${total}</div><div class="dash-sub">${pct}% complete</div></div><div class="dash-card"><div class="dash-label">Remaining</div><div class="dash-value" style="font-size:15px">${catText}</div><div class="dash-sub">owned / total</div></div><div class="dash-card"><div class="dash-label">Sets Mastered</div><div class="dash-value">${completed} / ${sets.size}</div><div class="dash-sub">mastered expansions</div></div><div class="dash-card"><div class="dash-label">Total Cards</div><div class="dash-value" style="font-size:15px">IR · SIR · TG · GG · AAS · Gold</div><div class="dash-sub">special-art master collection</div></div>`; $('#dashboard').hidden=false;
 }
 function cardHTML(c){const own=isOwned(c.id),cls=categoryClass(c);const img=c.images?.small||c.images?.large||'';return `<article class="card ${own?'owned':''} card-click" data-id="${esc(c.id)}" tabindex="0" role="button"><img loading="lazy" src="${esc(img)}" alt="${esc(c.name)} - ${esc(c.set?.name)} #${esc(c.number)}" /><h3>${esc(c.name)}</h3><p>#${esc(c.number)} · ${esc(c.set?.name)}</p><span class="rarity-pill ${cls}">${esc(categoryCode(c))}</span><button class="owned-toggle ${own?'on':''}" data-owned-action="1">${own?'✓ Owned':'Mark Owned'}</button></article>`}
 function openCardModal(id){const c=state.cards.find(x=>x.id===id);if(!c)return;const own=isOwned(c.id);$('#modalContent').innerHTML=`<div class="modal-grid"><div><img src="${esc(c.images?.large||c.images?.small||'')}" alt="${esc(c.name)}" /></div><div><h2 id="modalTitle">${esc(c.name)}</h2><div class="modal-meta">${esc(c.set?.name)} · #${esc(c.number)} · ${esc(categoryLabel(c))}<br>${esc(displayReleaseDate(c.set?.releaseDate))}${c.set?.series?' · '+esc(c.set.series):''}</div><button class="modal-owned ${own?'active':''}" id="modalOwnedBtn">${own?'✓ Owned':'Mark as Owned'}</button></div></div>`;$('#cardModal').classList.add('show');$('#cardModal').setAttribute('aria-hidden','false');$('#modalOwnedBtn').onclick=()=>{setOwned(c.id,!isOwned(c.id));openCardModal(c.id);render()}}
@@ -207,8 +274,8 @@ function render(){
 }
 function renderStats(){const owned=state.cards.filter(c=>isOwned(c.id)).length,showing=document.querySelectorAll('.card').length,pct=state.cards.length?Math.round(owned/state.cards.length*100):0;$('#stats').textContent=`Showing ${showing} / ${state.cards.length} · Owned ${owned} (${pct}%)`;const b=$('#overallBar');if(b)b.style.width=pct+'%'}
 $('#search').addEventListener('input',e=>{state.search=e.target.value;render()});
-function setFilter(f){state.filter=f;['all','ir','sir','tg','gg','aas','gold'].forEach(x=>$('#'+x+'Btn').classList.toggle('active',x===f));render()}
-$('#allBtn').onclick=()=>setFilter('all');$('#irBtn').onclick=()=>setFilter('ir');$('#sirBtn').onclick=()=>setFilter('sir');$('#tgBtn').onclick=()=>setFilter('tg');$('#ggBtn').onclick=()=>setFilter('gg');$('#aasBtn').onclick=()=>setFilter('aas');$('#goldBtn').onclick=()=>setFilter('gold');
+function setFilter(f){state.filter=f;['all','fa','afa','aas','rainbow','tg','gg','gold','ir','sir'].forEach(x=>$('#'+x+'Btn').classList.toggle('active',x===f));render()}
+$('#allBtn').onclick=()=>setFilter('all');$('#faBtn').onclick=()=>setFilter('fa');$('#afaBtn').onclick=()=>setFilter('afa');$('#rainbowBtn').onclick=()=>setFilter('rainbow');$('#irBtn').onclick=()=>setFilter('ir');$('#sirBtn').onclick=()=>setFilter('sir');$('#tgBtn').onclick=()=>setFilter('tg');$('#ggBtn').onclick=()=>setFilter('gg');$('#aasBtn').onclick=()=>setFilter('aas');$('#goldBtn').onclick=()=>setFilter('gold');
 $('#sortSelect').onchange=e=>{state.sort=e.target.value;render()};
 $('#randomBtn').onclick=()=>{const missing=state.cards.filter(c=>!isOwned(c.id));if(!missing.length){alert('You own every card in the tracker. Absolute menace.');return}const c=missing[Math.floor(Math.random()*missing.length)];state.openSetId=c.set?.id||c.set?.name;render();requestAnimationFrame(()=>requestAnimationFrame(()=>{document.querySelector(`.card[data-id="${CSS.escape(c.id)}"]`)?.scrollIntoView({behavior:'smooth',block:'center'});openCardModal(c.id)}))};
 $('#modalClose').onclick=closeCardModal;$('#cardModal').addEventListener('click',e=>{if(e.target===$('#cardModal'))closeCardModal()});document.addEventListener('keydown',e=>{if(e.key==='Escape')closeCardModal()});
