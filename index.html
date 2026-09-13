@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Pokémon Special Art Master Tracker</title>
-<meta name="app-version" content="v17" />
+<meta name="app-version" content="v18" />
 <style>
 :root{
   --bg:#0d1020; --panel:#151a31; --panel2:#1d2442; --ink:#f4f7ff; --muted:#aeb9d9;
@@ -358,13 +358,31 @@ function categoryClass(c){return (c.categoryCode||'art').toLowerCase()}
 
 const SUBSET_LOGO_PARENT={
   'swsh4.5sv':'swsh4.5',
+  'sma':'sm11.5',
   'sm11.5sv':'sm11.5'
 };
+function assetSeriesFolder(setId){
+  const id=String(setId||'').toLowerCase();
+  if(id.startsWith('swsh'))return 'swsh';
+  if(id.startsWith('sm')||id==='sma')return 'sm';
+  if(id.startsWith('sv'))return 'sv';
+  if(id.startsWith('xy'))return 'xy';
+  if(id.startsWith('bw'))return 'bw';
+  if(id.startsWith('me'))return 'me';
+  return '';
+}
+function genericSetLogo(setId){
+  const folder=assetSeriesFolder(setId);
+  return folder&&setId ? `https://assets.tcgdex.net/en/${folder}/${setId}/logo` : '';
+}
+function genericCardAsset(setId,localId){
+  const folder=assetSeriesFolder(setId);
+  return folder&&setId&&localId ? `https://assets.tcgdex.net/en/${folder}/${setId}/${localId}` : '';
+}
 function subsetParentLogo(setId){
   const parent=SUBSET_LOGO_PARENT[setId];
   if(!parent)return '';
-  const series=parent.startsWith('swsh')?'swsh':'sm';
-  return `https://assets.tcgdex.net/en/${series}/${parent}/logo`;
+  return genericSetLogo(parent);
 }
 
 const GALLERY_ASSET_PARENT={
@@ -544,11 +562,13 @@ async function load(){
     const fullSetMap=new Map(fullSets.map(set=>[set.id,set]));
     const normalize=(c,label,code,setOverride)=>{
       const brief=setOverride||findSet(c.id,setBriefs); const set=fullSetMap.get(brief?.id)||setOverride||brief;
-      const galleryBase=(code==='TG'||code==='GG')?galleryAssetImage(set?.id||brief?.id,c.localId):'';
-      const base=c.image||galleryBase;
-      const galleryLogo=(code==='TG'||code==='GG')?galleryParentLogo(set?.id||brief?.id):'';
+      const setId=set?.id||brief?.id||'';
+      const galleryBase=(code==='TG'||code==='GG')?galleryAssetImage(setId,c.localId):'';
+      const base=c.image||galleryBase||genericCardAsset(setId,c.localId);
+      const galleryLogo=(code==='TG'||code==='GG')?galleryParentLogo(setId):'';
+      const logo=set?.logo||galleryLogo||subsetParentLogo(setId)||genericSetLogo(setId);
       return {...c, categoryLabel:label, categoryCode:code, number:c.localId,
-        set:{...set,logo:set?.logo||galleryLogo,series:set?.serie?.name||'',releaseDate:set?.releaseDate||''},
+        set:{...set,logo,series:set?.serie?.name||'',releaseDate:set?.releaseDate||''},
         images:{large:imageURL(base,'high'),small:imageURL(base,'low')}};
     };
     const regularFullArts=ultras.filter(c=>{
