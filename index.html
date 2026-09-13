@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Pokémon Special Art Master Tracker</title>
-<meta name="app-version" content="v15" />
+<meta name="app-version" content="v16" />
 <style>
 :root{
   --bg:#0d1020; --panel:#151a31; --panel2:#1d2442; --ink:#f4f7ff; --muted:#aeb9d9;
@@ -257,7 +257,6 @@ body{padding-bottom:0!important}
       <button id="faBtn">Full Art</button>
       <button id="afaBtn">Alt Full Art</button>
       <button id="aasBtn">Alt Art Secret</button>
-      <button id="rainbowBtn">Rainbow/Secret</button>
       <button id="tgBtn">Trainer Gallery</button>
       <button id="ggBtn">Galarian Gallery</button>
       <button id="goldBtn">Gold</button>
@@ -567,7 +566,6 @@ async function load(){
       ...fullArtTrainers.map(c=>normalize(c,'Full Art','FA')),
       ...altFullArts.map(c=>normalize(c,'Alternate Full Art','AFA')),
       ...altSecrets.map(c=>normalize(c,'Alternate Art Secret','AAS')),
-      ...rainbowSecrets.map(c=>normalize(c,'Rainbow / Secret','RAINBOW')),
       ...movedGoldSecrets.map(c=>normalize(c,'Gold Secret Rare','GOLD')),
       ...goldHyper.map(c=>normalize(c,'Hyper Rare (Gold)','GOLD')),
       ...goldMega.map(c=>normalize(c,'Mega Hyper Rare (Gold)','GOLD')),
