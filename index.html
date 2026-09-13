@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Pokémon Special Art Master Tracker</title>
-<meta name="app-version" content="v10" />
+<meta name="app-version" content="v11" />
 <style>
 :root{
   --bg:#0d1020; --panel:#151a31; --panel2:#1d2442; --ink:#f4f7ff; --muted:#aeb9d9;
@@ -112,21 +112,117 @@ main{padding-top:4px}
 }
 </style>
 
+
+<style id="v11-ui">
+:root{
+  --v11-bg:#06101c; --v11-panel:#0a1727; --v11-panel2:#0e1e32;
+  --v11-line:#28405f; --v11-text:#f7f9ff; --v11-muted:#9eacc3;
+  --v11-red:#ff4c5f; --v11-yellow:#ffd35a; --v11-cyan:#36d7ff;
+}
+html{scroll-behavior:smooth}
+body{background:
+ radial-gradient(circle at 90% 0%,rgba(255,76,95,.13),transparent 24%),
+ radial-gradient(circle at 0% 35%,rgba(54,215,255,.06),transparent 22%),
+ var(--v11-bg);color:var(--v11-text);padding-bottom:84px}
+.v11-page{min-height:100vh}
+.v11-hero{max-width:1180px;margin:auto;padding:34px 18px 22px}
+.v11-brand{display:flex;align-items:center;gap:18px}
+.v11-brand .pokeball{margin:0;flex:0 0 auto;width:62px;height:62px}
+.v11-brand h1{margin:0;font-size:clamp(31px,5vw,50px);line-height:1.02;letter-spacing:-1.7px}
+.v11-brand h1 span{color:var(--v11-red)}
+.v11-brand p{max-width:760px;margin:11px 0 0;color:var(--v11-muted);font-size:16px}
+.v11-command{max-width:1180px;margin:auto;padding:0 18px 8px}
+.v11-search-wrap{position:relative}
+.v11-search-icon{position:absolute;left:16px;top:50%;transform:translateY(-53%);font-size:30px;color:#fff;z-index:2}
+.v11-search-wrap input[type=search]{height:58px;border-radius:17px;padding:0 18px 0 52px;background:#091526;border:1px solid #2d486d;font-size:17px;box-shadow:0 8px 24px rgba(0,0,0,.18)}
+.v11-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.v11-tabs button{border-radius:999px;padding:10px 15px;background:#091526;border:1px solid #263d5c;white-space:nowrap}
+.v11-tabs button.active{background:var(--v11-red);border-color:var(--v11-red);color:#fff;box-shadow:0 0 22px rgba(255,76,95,.26)}
+.v11-main{max-width:1180px;margin:auto;padding:12px 18px 50px}
+.v11-dashboard{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:8px 0 16px}
+.v11-stat{min-height:142px;background:linear-gradient(180deg,#0d1c2e,#091422);border:1px solid #253d5d;border-radius:20px;padding:17px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.v11-stat-icon{font-size:24px;margin-bottom:5px}
+.v11-stat-value{font-size:29px;font-weight:950;line-height:1.05}
+.v11-stat-label{margin-top:7px;font-weight:800}
+.v11-stat-sub{font-size:12px;color:var(--v11-muted);margin-top:3px}
+.v11-actions{display:grid;grid-template-columns:minmax(260px,1fr) minmax(190px,280px);gap:12px;align-items:stretch;margin:0 0 12px}
+.v11-random{display:flex;gap:12px;align-items:center;text-align:left;border-radius:18px;padding:13px 16px;background:linear-gradient(115deg,rgba(255,76,95,.25),rgba(54,215,255,.18));border:1px solid #4c7698}
+.v11-random .dice{font-size:27px}
+.v11-random strong{display:block;font-size:16px}
+.v11-random small{display:block;color:#becbe0;font-size:11px;margin-top:1px}
+.v11-actions .sort-select{height:100%;min-height:54px;border-radius:16px;background:#091526;border-color:#29415f}
+.v11-data-tools{margin:0 0 18px;color:var(--v11-muted);font-size:12px}
+.v11-data-tools summary{cursor:pointer;width:max-content;padding:5px 0}
+.v11-data-inner{margin-top:8px;padding:11px 13px;background:#091526;border:1px solid #223753;border-radius:12px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.v11-data-inner div{display:flex;gap:7px}
+.v11-hidden-stats{display:none!important}
+.v11-discover-head{display:flex;justify-content:space-between;align-items:end;gap:12px;margin:22px 2px 12px}
+.v11-discover-head h2{margin:0;font-size:27px}
+.v11-discover-head p{margin:4px 0 0;color:var(--v11-muted);font-size:13px}
+.v11-shuffle{font-size:12px;border-radius:999px}
+.v11-all-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:14px}
+.v11-all-grid .card{border-radius:17px;background:linear-gradient(180deg,#0e1c2e,#091320);border-color:#243d5c}
+.v11-all-grid .card img{border-radius:12px}
+.v11-category-note{padding:15px 17px;margin:6px 0 18px;border-radius:15px;background:#0a1727;border:1px solid #263e5e;color:var(--v11-muted)}
+.v11-category-note strong{color:#fff}
+.set{margin:14px 0 18px}
+.set-head{background:#091526;border:1px solid #263e5e;border-radius:17px;padding:14px;border-bottom:1px solid #263e5e;align-items:center}
+.set-body{padding:6px 3px 4px}
+.set-title{font-size:24px}
+.v11-bottom-nav{display:none}
+footer{opacity:.55}
+@media(max-width:760px){
+ body{padding-bottom:88px}
+ .v11-hero{padding:25px 18px 17px}
+ .v11-brand{align-items:flex-start;gap:14px}
+ .v11-brand .pokeball{width:52px;height:52px}
+ .v11-brand h1{font-size:31px}
+ .v11-brand p{font-size:14px;line-height:1.55}
+ .v11-command{padding-left:14px;padding-right:14px}
+ .v11-search-wrap input[type=search]{height:56px}
+ .v11-tabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding:0 1px 7px}
+ .v11-tabs::-webkit-scrollbar{display:none}
+ .v11-tabs button{flex:0 0 auto}
+ .v11-main{padding:8px 14px 35px}
+ .v11-dashboard{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+ .v11-stat{min-height:128px;padding:13px 9px}
+ .v11-stat-value{font-size:25px}
+ .v11-actions{grid-template-columns:1fr 1fr}
+ .v11-random{padding:11px 12px}
+ .v11-random small{display:none}
+ .v11-data-inner{align-items:flex-start;flex-direction:column}
+ .v11-all-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+ .v11-discover-head h2{font-size:23px}
+ .set-head{padding:12px}
+ .set-title{font-size:21px}
+ .v11-bottom-nav{position:fixed;display:grid;grid-template-columns:repeat(5,1fr);left:0;right:0;bottom:0;height:72px;z-index:45;background:rgba(5,13,24,.94);backdrop-filter:blur(18px);border-top:1px solid #263b59;padding-bottom:max(5px,env(safe-area-inset-bottom))}
+ .v11-bottom-nav button{border:0;background:transparent;border-radius:0;padding:8px 2px 4px;color:#95a5bd;font-size:22px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}
+ .v11-bottom-nav button span{font-size:10px}
+ .v11-bottom-nav button.active{color:var(--v11-red);box-shadow:none}
+ footer{display:none}
+}
+</style>
+
 </head>
 <body>
-<header class="hero">
-  <div class="hero-inner">
-    <div class="pokeball" aria-hidden="true"></div>
-    <div>
-      <h1>Pokémon <span class="accent">Special Art</span><br>Master Tracker</h1>
-      <p class="subtitle">English special-art and chase cards across eras — grouped by expansion with live card art and collection tracking.</p>
+<div class="v11-page">
+  <header class="v11-hero">
+    <div class="v11-brand">
+      <div class="pokeball" aria-hidden="true"></div>
+      <div>
+        <h1>Pokémon <span>Special Art</span><br>Master Tracker</h1>
+        <p>English special-art and chase cards across eras — grouped by expansion with live card art and collection tracking.</p>
+      </div>
     </div>
-  </div>
-</header>
-<div class="toolbar-wrap">
-  <div class="toolbar">
-    <input id="search" type="search" placeholder="Search a card or set…" autocomplete="off" />
-    <div class="controls">
+  </header>
+
+  <section class="v11-command">
+    <div class="v11-search-wrap">
+      <span class="v11-search-icon">⌕</span>
+      <input id="search" type="search" placeholder="Search a card, set, or number…" autocomplete="off" />
+    </div>
+
+    <div class="v11-tabs" aria-label="Card categories">
       <button id="allBtn" class="active">All</button>
       <button id="faBtn">Full Art</button>
       <button id="afaBtn">Alt Full Art</button>
@@ -137,24 +233,67 @@ main{padding-top:4px}
       <button id="goldBtn">Gold</button>
       <button id="irBtn">IR</button>
       <button id="sirBtn">SIR</button>
-      <button id="randomBtn">🎲 Who’s Next?</button>
-      <select id="sortSelect" class="sort-select" aria-label="Sort sets"><option value="newest">Newest → Oldest</option><option value="oldest">Oldest → Newest</option><option value="az">Set Name A–Z</option></select>
     </div>
-    <div class="stats"><span id="stats">Loading catalog…</span><div class="progress"><span id="overallBar"></span></div></div>
+  </section>
+
+  <main class="v11-main">
+    <div id="localWarning" class="notice local-warning"><strong>Local-file mode:</strong> live card requests can be blocked by some browsers. Use the hosted site for the normal experience.</div>
+
+    <div id="dashboard" class="v11-dashboard" hidden></div>
+
+    <div class="v11-actions">
+      <button id="randomBtn" class="v11-random"><span class="dice">🎲</span><span><strong>Who’s Next?</strong><small>Pick a random missing card</small></span></button>
+      <select id="sortSelect" class="sort-select" aria-label="Sort sets">
+        <option value="newest">Newest → Oldest</option>
+        <option value="oldest">Oldest → Newest</option>
+        <option value="az">Set Name A–Z</option>
+      </select>
+    </div>
+
+    <details class="v11-data-tools">
+      <summary>Collection data</summary>
+      <div class="v11-data-inner">
+        <span>Owned cards save automatically on this device.</span>
+        <div>
+          <button class="ghost" id="exportBtn">Backup</button>
+          <button class="ghost" id="importBtn">Restore</button>
+          <input id="importFile" type="file" accept="application/json" hidden>
+        </div>
+      </div>
+    </details>
+
+    <div class="stats v11-hidden-stats"><span id="stats">Loading catalog…</span><div class="progress"><span id="overallBar"></span></div></div>
+
+    <div id="loading" class="loading">
+      <div class="spinner"></div>
+      <strong>Building the master catalog…</strong><br>
+      <span class="small">Pulling special-art cards, galleries, gold cards, set logos, and release dates.</span>
+    </div>
+
+    <div id="app"></div>
+  </main>
+
+  <nav class="v11-bottom-nav" aria-label="Quick navigation">
+    <button class="active" id="navHome">⌂<span>Home</span></button>
+    <button id="navSets">▱<span>Sets</span></button>
+    <button id="navCollection">▣<span>Collection</span></button>
+    <button id="navSearch">⌕<span>Search</span></button>
+    <button id="navMore">•••<span>More</span></button>
+  </nav>
+</div>
+
+<footer>Fan-made collector catalog. Pokémon, card names, artwork, and related marks belong to their respective owners. Card data and images are displayed from TCGdex.</footer>
+
+<div id="cardModal" class="modal-backdrop" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <button id="modalClose" class="modal-close" aria-label="Close">×</button>
+    <div id="modalContent"></div>
   </div>
 </div>
-<main>
-  <div class="backup-row"><span class="small">Owned saves automatically on this device.</span><div class="actions"><button class="ghost" id="exportBtn">Backup</button><button class="ghost" id="importBtn">Restore</button><input id="importFile" type="file" accept="application/json" hidden></div></div><div id="localWarning" class="notice local-warning"><strong>Local-file mode:</strong> this copy is being opened directly from a file. Some iPhone/iPad browsers block the live card request in this mode. The hosted version uses the same file at a normal HTTPS address and avoids that issue.</div>
-  <div id="dashboard" class="dashboard" hidden></div>
-  <div id="loading" class="loading"><div class="spinner"></div><strong>Building the master catalog…</strong><br><span class="small">Pulling special-art cards, galleries, gold cards, set logos, and release dates.</span></div>
-  <div id="app"></div>
-</main>
-<footer>Fan-made collector catalog. Pokémon, card names, artwork, and related marks are property of The Pokémon Company / Nintendo / Creatures / GAME FREAK. Card data and images are displayed from TCGdex and are not bundled into this file.</footer>
-<div id="cardModal" class="modal-backdrop" aria-hidden="true"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><button id="modalClose" class="modal-close" aria-label="Close">×</button><div id="modalContent"></div></div></div>
 <script>
 const CUTOFF = new Date('2026-09-12T23:59:59');
 const API = 'https://api.tcgdex.net/v2/en';
-const state = {cards:[], filter:'all', missing:false, search:'', openSetId:null, sort:'newest'};
+const state = {cards:[], filter:'all', missing:false, search:'', openSetId:null, sort:'newest', allOrder:[]};
 const $ = s => document.querySelector(s);
 const esc = s => String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 function ownedKey(id){return 'pokemon-ir-sir-owned:'+id}
@@ -248,33 +387,122 @@ async function load(){
     const priority={IR:1,SIR:2,TG:3,GG:4,AAS:5,GOLD:6}; const byId=new Map();
     for(const c of cards){const old=byId.get(c.id);if(!old||priority[c.categoryCode]>priority[old.categoryCode])byId.set(c.id,c)}
     state.cards=[...byId.values()].filter(c=>{if(!c.set?.releaseDate)return true;const t=parseReleaseDate(c.set.releaseDate);return t&&t<=CUTOFF.getTime()}).sort((a,b)=>{const da=parseReleaseDate(a.set?.releaseDate),db=parseReleaseDate(b.set?.releaseDate);if(da!==db)return db-da;return String(a.number).localeCompare(String(b.number),undefined,{numeric:true})});
+    state.allOrder=[...state.cards].sort(()=>Math.random()-.5).map(c=>c.id);
     $('#loading').remove(); render();
   }catch(e){$('#loading').innerHTML=`<div class="notice error"><strong>Couldn’t load the live catalog.</strong><br>${esc(e.message)}</div>`;$('#stats').textContent='Load failed'}
 }
 function completionClass(pct){return pct===100?'c100':pct>=75?'c75':pct>=50?'c50':pct>=25?'c25':''}
 function completionLabel(pct){return pct===100?'COMPLETE':pct>=75?'75%+':pct>=50?'HALFWAY':pct>=25?'25%+':''}
 function renderDashboard(){
- const total=state.cards.length,owned=state.cards.filter(c=>isOwned(c.id)).length,pct=total?Math.round(owned/total*100):0;
- const cats=['IR','SIR','TG','GG','AAS','GOLD']; const catText=cats.map(k=>{const a=state.cards.filter(c=>c.categoryCode===k),o=a.filter(c=>isOwned(c.id)).length;return `${k} ${o}/${a.length}`}).join(' · ');
- const sets=new Map();for(const c of state.cards){const k=c.set?.id||c.set?.name;if(!sets.has(k))sets.set(k,[]);sets.get(k).push(c)} const completed=[...sets.values()].filter(cs=>cs.length&&cs.every(c=>isOwned(c.id))).length;
- $('#dashboard').innerHTML=`<div class="dash-card"><div class="dash-label">Owned</div><div class="dash-value">${owned} / ${total}</div><div class="dash-sub">${pct}% complete</div></div><div class="dash-card"><div class="dash-label">Remaining</div><div class="dash-value" style="font-size:15px">${catText}</div><div class="dash-sub">owned / total</div></div><div class="dash-card"><div class="dash-label">Sets Mastered</div><div class="dash-value">${completed} / ${sets.size}</div><div class="dash-sub">mastered expansions</div></div><div class="dash-card"><div class="dash-label">Total Cards</div><div class="dash-value" style="font-size:15px">IR · SIR · TG · GG · AAS · Gold</div><div class="dash-sub">special-art master collection</div></div>`; $('#dashboard').hidden=false;
+ const total=state.cards.length,owned=state.cards.filter(c=>isOwned(c.id)).length,remaining=total-owned,pct=total?Math.round(owned/total*100):0;
+ const sets=new Map();
+ for(const c of state.cards){const k=c.set?.id||c.set?.name;if(!sets.has(k))sets.set(k,[]);sets.get(k).push(c)}
+ const mastered=[...sets.values()].filter(cs=>cs.length&&cs.every(c=>isOwned(c.id))).length;
+ $('#dashboard').innerHTML=`
+ <div class="v11-stat"><div class="v11-stat-icon">▣</div><div class="v11-stat-value">${total.toLocaleString()}</div><div class="v11-stat-label">Total Cards</div><div class="v11-stat-sub">master tracker</div></div>
+ <div class="v11-stat"><div class="v11-stat-icon">✓</div><div class="v11-stat-value">${owned.toLocaleString()}</div><div class="v11-stat-label">Owned</div><div class="v11-stat-sub">${pct}% complete</div></div>
+ <div class="v11-stat"><div class="v11-stat-icon">◔</div><div class="v11-stat-value">${remaining.toLocaleString()}</div><div class="v11-stat-label">Remaining</div><div class="v11-stat-sub">${100-pct}% left</div></div>
+ <div class="v11-stat"><div class="v11-stat-icon">≋</div><div class="v11-stat-value">${mastered}/${sets.size}</div><div class="v11-stat-label">Sets Mastered</div><div class="v11-stat-sub">completed expansions</div></div>`;
+ $('#dashboard').hidden=false;
 }
 function cardHTML(c){const own=isOwned(c.id),cls=categoryClass(c);const img=c.images?.small||c.images?.large||'';return `<article class="card ${own?'owned':''} card-click" data-id="${esc(c.id)}" tabindex="0" role="button"><img loading="lazy" src="${esc(img)}" alt="${esc(c.name)} - ${esc(c.set?.name)} #${esc(c.number)}" /><h3>${esc(c.name)}</h3><p>#${esc(c.number)} · ${esc(c.set?.name)}</p><span class="rarity-pill ${cls}">${esc(categoryCode(c))}</span><button class="owned-toggle ${own?'on':''}" data-owned-action="1">${own?'✓ Owned':'Mark Owned'}</button></article>`}
 function openCardModal(id){const c=state.cards.find(x=>x.id===id);if(!c)return;const own=isOwned(c.id);$('#modalContent').innerHTML=`<div class="modal-grid"><div><img src="${esc(c.images?.large||c.images?.small||'')}" alt="${esc(c.name)}" /></div><div><h2 id="modalTitle">${esc(c.name)}</h2><div class="modal-meta">${esc(c.set?.name)} · #${esc(c.number)} · ${esc(categoryLabel(c))}<br>${esc(displayReleaseDate(c.set?.releaseDate))}${c.set?.series?' · '+esc(c.set.series):''}</div><button class="modal-owned ${own?'active':''}" id="modalOwnedBtn">${own?'✓ Owned':'Mark as Owned'}</button></div></div>`;$('#cardModal').classList.add('show');$('#cardModal').setAttribute('aria-hidden','false');$('#modalOwnedBtn').onclick=()=>{setOwned(c.id,!isOwned(c.id));openCardModal(c.id);render()}}
 function closeCardModal(){$('#cardModal').classList.remove('show');$('#cardModal').setAttribute('aria-hidden','true')}
 function render(){
- const q=state.search.trim().toLowerCase(); let cards=state.cards.filter(c=>{if(state.filter!=='all'&&c.categoryCode.toLowerCase()!==state.filter)return false;if(q&&!`${c.name} ${c.set?.name} ${c.number} ${categoryLabel(c)}`.toLowerCase().includes(q))return false;return true});
- const groups=new Map();for(const c of cards){const k=c.set?.id||c.set?.name||'Unknown';if(!groups.has(k))groups.set(k,{id:k,set:c.set,cards:[]});groups.get(k).cards.push(c)}
- const orderedGroups=[...groups.values()].sort((a,b)=>{if(state.sort==='az')return String(a.set?.name||'').localeCompare(String(b.set?.name||''));const da=parseReleaseDate(a.set?.releaseDate),db=parseReleaseDate(b.set?.releaseDate);if(da!==db)return state.sort==='oldest'?da-db:db-da;return String(a.set?.name||'').localeCompare(String(b.set?.name||''))}); if(state.openSetId&&!orderedGroups.some(g=>g.id===state.openSetId))state.openSetId=null;
- let html=''; const order=['IR','SIR','TG','GG','AAS','GOLD']; const headings={IR:'★ Illustration Rares',SIR:'★★ Special Illustration Rares',TG:'Trainer Gallery',GG:'Galarian Gallery',AAS:'Alternate Art Secret',GOLD:'Gold Cards'};
- for(const {id,set,cards:raw} of orderedGroups){const cs=[...raw].sort((a,b)=>String(a.number).localeCompare(String(b.number),undefined,{numeric:true}));const ownedSet=cs.filter(c=>isOwned(c.id)).length,pctSet=cs.length?Math.round(ownedSet/cs.length*100):0,open=state.openSetId===id,logo=assetURL(set?.logo),badge=completionLabel(pctSet),badgeClass=completionClass(pctSet);const counts=order.map(k=>{const n=cs.filter(c=>c.categoryCode===k).length;return n?`<span class="count ${k.toLowerCase()}">${n} ${k}</span>`:''}).join('');html+=`<section class="set" data-set-id="${esc(id)}"><div class="set-head" role="button" tabindex="0" aria-expanded="${open}"><div class="set-main">${logo?`<img class="set-logo" loading="lazy" src="${esc(logo)}" alt="${esc(set?.name||'Set')} logo" onerror="this.style.display='none'">`:`<div class="set-logo-fallback">TCG</div>`}<div class="set-copy"><h2 class="set-title">${esc(set?.name||'Unknown Set')}${badge?`<span class="completion-badge ${badgeClass}">${badge}</span>`:''}</h2><div class="set-meta">${esc(set?.series||'')} · ${esc(displayReleaseDate(set?.releaseDate))} · ${ownedSet}/${cs.length} owned (${pctSet}%)</div><div class="set-progress"><span style="width:${pctSet}%"></span></div></div></div><div class="counts">${counts}<span class="count">${cs.length} total</span><span class="set-chevron">⌄</span></div></div><div class="set-body ${open?'':'collapsed'}">`;for(const k of order){const arr=cs.filter(c=>c.categoryCode===k);if(arr.length)html+=`<h3 class="rarity-heading ${k.toLowerCase()}">${headings[k]}</h3><div class="grid">${arr.map(cardHTML).join('')}</div>`}html+='</div></section>'}
- $('#app').innerHTML=html||'<div class="empty">No cards match your current filters.</div>';const total=state.cards.length,owned=state.cards.filter(c=>isOwned(c.id)).length;$('#stats').textContent=`Showing ${cards.length} / ${total} · Owned ${owned}`;
- document.querySelectorAll('.set-head').forEach(h=>{const toggle=()=>{const id=h.closest('.set').dataset.setId,opening=state.openSetId!==id;state.openSetId=opening?id:null;render();if(opening)requestAnimationFrame(()=>{const target=document.querySelector(`.set[data-set-id="${CSS.escape(id)}"]`);if(target){const offset=(document.querySelector('.toolbar-wrap')?.offsetHeight||0)+8;window.scrollTo({top:target.getBoundingClientRect().top+window.scrollY-offset,behavior:'smooth'})}})};h.addEventListener('click',toggle);h.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle()}})});
- document.querySelectorAll('.card').forEach(card=>{const open=()=>openCardModal(card.dataset.id);card.addEventListener('click',e=>{if(!e.target.closest('[data-owned-action]'))open()});card.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&!e.target.closest('[data-owned-action]')){e.preventDefault();open()}})});document.querySelectorAll('[data-owned-action]').forEach(btn=>btn.addEventListener('click',e=>{e.stopPropagation();const card=e.currentTarget.closest('.card');setOwned(card.dataset.id,!isOwned(card.dataset.id));render()}));renderDashboard();renderStats();
+ const q=state.search.trim().toLowerCase();
+ let cards=state.cards.filter(c=>{
+   if(state.filter!=='all'&&c.categoryCode.toLowerCase()!==state.filter)return false;
+   if(q&&!`${c.name} ${c.set?.name} ${c.number} ${categoryLabel(c)}`.toLowerCase().includes(q))return false;
+   return true
+ });
+
+ if(state.filter==='all'){
+   const pos=new Map(state.allOrder.map((id,i)=>[id,i]));
+   cards=[...cards].sort((a,b)=>(pos.get(a.id)??999999)-(pos.get(b.id)??999999));
+   const shown=q?cards:cards.slice(0,36);
+   $('#app').innerHTML=`
+     <div class="v11-discover-head">
+       <div><h2>${q?'Search results':'Discover'}</h2><p>${q?`${shown.length} matching cards`:'A randomized mix from the entire tracker'}</p></div>
+       ${q?'':`<button class="v11-shuffle" id="shuffleAllBtn">↻ Shuffle</button>`}
+     </div>
+     <div class="v11-all-grid">${shown.map(cardHTML).join('')}</div>
+     ${!q&&cards.length>shown.length?`<div class="small" style="text-align:center;margin:16px 0;color:var(--muted)">Showing 36 randomized cards from ${cards.length.toLocaleString()} tracked cards.</div>`:''}`;
+   $('#sortSelect').style.visibility='hidden';
+   $('#shuffleAllBtn')?.addEventListener('click',()=>{state.allOrder=[...state.cards].sort(()=>Math.random()-.5).map(c=>c.id);render()});
+ }else{
+   $('#sortSelect').style.visibility='visible';
+
+   if(['fa','afa','rainbow'].includes(state.filter)){
+     const names={fa:'Full Art',afa:'Alt Full Art',rainbow:'Rainbow/Secret'};
+     $('#app').innerHTML=`<div class="v11-category-note"><strong>${names[state.filter]}</strong> is in the tracker navigation, but the card list is intentionally not populated yet. We’re curating this category instead of misclassifying cards from the API.</div>`;
+     renderDashboard();renderStats();return;
+   }
+
+   const groups=new Map();
+   for(const c of cards){
+     const k=c.set?.id||c.set?.name||'Unknown';
+     if(!groups.has(k))groups.set(k,{id:k,set:c.set,cards:[]});
+     groups.get(k).cards.push(c)
+   }
+   const orderedGroups=[...groups.values()].sort((a,b)=>{
+     if(state.sort==='az')return String(a.set?.name||'').localeCompare(String(b.set?.name||''));
+     const da=parseReleaseDate(a.set?.releaseDate),db=parseReleaseDate(b.set?.releaseDate);
+     if(da!==db)return state.sort==='oldest'?da-db:db-da;
+     return String(a.set?.name||'').localeCompare(String(b.set?.name||''))
+   });
+   if(state.openSetId&&!orderedGroups.some(g=>g.id===state.openSetId))state.openSetId=null;
+
+   let html='';
+   const order=['IR','SIR','TG','GG','AAS','GOLD'];
+   const headings={IR:'★ Illustration Rares',SIR:'★★ Special Illustration Rares',TG:'Trainer Gallery',GG:'Galarian Gallery',AAS:'Alternate Art Secret',GOLD:'Gold Cards'};
+
+   for(const {id,set,cards:raw} of orderedGroups){
+     const cs=[...raw].sort((a,b)=>String(a.number).localeCompare(String(b.number),undefined,{numeric:true}));
+     const ownedSet=cs.filter(c=>isOwned(c.id)).length,pctSet=cs.length?Math.round(ownedSet/cs.length*100):0,open=state.openSetId===id;
+     const logo=assetURL(set?.logo),badge=completionLabel(pctSet),badgeClass=completionClass(pctSet);
+     const counts=order.map(k=>{const n=cs.filter(c=>c.categoryCode===k).length;return n?`<span class="count ${k.toLowerCase()}">${n} ${k}</span>`:''}).join('');
+     html+=`<section class="set" data-set-id="${esc(id)}"><div class="set-head" role="button" tabindex="0" aria-expanded="${open}"><div class="set-main">${logo?`<img class="set-logo" loading="lazy" src="${esc(logo)}" alt="${esc(set?.name||'Set')} logo" onerror="this.style.display='none'">`:`<div class="set-logo-fallback">TCG</div>`}<div class="set-copy"><h2 class="set-title">${esc(set?.name||'Unknown Set')}${badge?`<span class="completion-badge ${badgeClass}">${badge}</span>`:''}</h2><div class="set-meta">${esc(set?.series||'')} · ${esc(displayReleaseDate(set?.releaseDate))} · ${ownedSet}/${cs.length} owned (${pctSet}%)</div><div class="set-progress"><span style="width:${pctSet}%"></span></div></div></div><div class="counts">${counts}<span class="count">${cs.length} total</span><span class="set-chevron">⌄</span></div></div><div class="set-body ${open?'':'collapsed'}">`;
+     for(const k of order){
+       const arr=cs.filter(c=>c.categoryCode===k);
+       if(arr.length)html+=`<h3 class="rarity-heading ${k.toLowerCase()}">${headings[k]}</h3><div class="grid">${arr.map(cardHTML).join('')}</div>`
+     }
+     html+='</div></section>'
+   }
+   $('#app').innerHTML=html||'<div class="empty">No cards match your current filters.</div>';
+
+   document.querySelectorAll('.set-head').forEach(h=>{
+     const toggle=()=>{
+       const id=h.closest('.set').dataset.setId,opening=state.openSetId!==id;
+       state.openSetId=opening?id:null;render();
+       if(opening)requestAnimationFrame(()=>{
+         const target=document.querySelector(`.set[data-set-id="${CSS.escape(id)}"]`);
+         if(target)window.scrollTo({top:target.getBoundingClientRect().top+window.scrollY-12,behavior:'smooth'})
+       })
+     };
+     h.addEventListener('click',toggle);
+     h.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle()}})
+   });
+ }
+
+ document.querySelectorAll('.card').forEach(card=>{
+   const open=()=>openCardModal(card.dataset.id);
+   card.addEventListener('click',e=>{if(!e.target.closest('[data-owned-action]'))open()});
+   card.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&!e.target.closest('[data-owned-action]')){e.preventDefault();open()}})
+ });
+ document.querySelectorAll('[data-owned-action]').forEach(btn=>btn.addEventListener('click',e=>{
+   e.stopPropagation();const card=e.currentTarget.closest('.card');setOwned(card.dataset.id,!isOwned(card.dataset.id));render()
+ }));
+ renderDashboard();renderStats();
 }
 function renderStats(){const owned=state.cards.filter(c=>isOwned(c.id)).length,showing=document.querySelectorAll('.card').length,pct=state.cards.length?Math.round(owned/state.cards.length*100):0;$('#stats').textContent=`Showing ${showing} / ${state.cards.length} · Owned ${owned} (${pct}%)`;const b=$('#overallBar');if(b)b.style.width=pct+'%'}
 $('#search').addEventListener('input',e=>{state.search=e.target.value;render()});
-function setFilter(f){state.filter=f;['all','fa','afa','aas','rainbow','tg','gg','gold','ir','sir'].forEach(x=>$('#'+x+'Btn').classList.toggle('active',x===f));render()}
+function setFilter(f){
+ const reshuffle=f==='all'&&state.filter==='all';
+ state.filter=f;
+ if(reshuffle)state.allOrder=[...state.cards].sort(()=>Math.random()-.5).map(c=>c.id);
+ ['all','fa','afa','aas','rainbow','tg','gg','gold','ir','sir'].forEach(x=>$('#'+x+'Btn').classList.toggle('active',x===f));
+ render()
+}
 $('#allBtn').onclick=()=>setFilter('all');$('#faBtn').onclick=()=>setFilter('fa');$('#afaBtn').onclick=()=>setFilter('afa');$('#rainbowBtn').onclick=()=>setFilter('rainbow');$('#irBtn').onclick=()=>setFilter('ir');$('#sirBtn').onclick=()=>setFilter('sir');$('#tgBtn').onclick=()=>setFilter('tg');$('#ggBtn').onclick=()=>setFilter('gg');$('#aasBtn').onclick=()=>setFilter('aas');$('#goldBtn').onclick=()=>setFilter('gold');
 $('#sortSelect').onchange=e=>{state.sort=e.target.value;render()};
 $('#randomBtn').onclick=()=>{const missing=state.cards.filter(c=>!isOwned(c.id));if(!missing.length){alert('You own every card in the tracker. Absolute menace.');return}const c=missing[Math.floor(Math.random()*missing.length)];state.openSetId=c.set?.id||c.set?.name;render();requestAnimationFrame(()=>requestAnimationFrame(()=>{document.querySelector(`.card[data-id="${CSS.escape(c.id)}"]`)?.scrollIntoView({behavior:'smooth',block:'center'});openCardModal(c.id)}))};
@@ -283,6 +511,13 @@ if(location.protocol==='file:') $('#localWarning').classList.add('show');
 $('#exportBtn').onclick=()=>{const owned=state.cards.filter(c=>isOwned(c.id)).map(c=>c.id);const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),owned},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='pokemon-special-art-collection.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
 $('#importBtn').onclick=()=>$('#importFile').click();
 $('#importFile').addEventListener('change',async e=>{const f=e.target.files?.[0];if(!f)return;try{const j=JSON.parse(await f.text());if(!Array.isArray(j.owned))throw new Error('Invalid collection file');for(const c of state.cards)setOwned(c.id,j.owned.includes(c.id));render()}catch(err){alert('Could not import collection: '+err.message)}finally{e.target.value=''}});
+
+$('#navHome').onclick=()=>{setFilter('all');window.scrollTo({top:0,behavior:'smooth'})};
+$('#navSets').onclick=()=>{setFilter('ir');document.querySelector('.v11-tabs')?.scrollIntoView({behavior:'smooth',block:'start'})};
+$('#navCollection').onclick=()=>{$('#dashboard')?.scrollIntoView({behavior:'smooth',block:'start'})};
+$('#navSearch').onclick=()=>{$('#search').focus();window.scrollTo({top:document.querySelector('.v11-command').offsetTop-8,behavior:'smooth'})};
+$('#navMore').onclick=()=>{const d=document.querySelector('.v11-data-tools');if(d){d.open=true;d.scrollIntoView({behavior:'smooth',block:'center'})}};
+
 load();
 </script>
 </body>
