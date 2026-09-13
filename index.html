@@ -72,50 +72,58 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:25px;border-t
   </div>
 </div>
 <main>
-  <div class="notice"><strong>How this catalog works:</strong> card data and artwork are loaded live from the Pokémon TCG API. Your checklist is saved in this browser. Click a set heading to collapse/expand it. Use Export Collection to back up your checked cards and Import Collection to restore them on another device.<div class="actions"><button class="ghost" id="exportBtn">Export Collection</button><button class="ghost" id="importBtn">Import Collection</button><input id="importFile" type="file" accept="application/json" hidden></div></div><div id="localWarning" class="notice local-warning"><strong>Local-file mode:</strong> this copy is being opened directly from a file. Some iPhone/iPad browsers block the live card request in this mode. The hosted version uses the same file at a normal HTTPS address and avoids that issue.</div>
+  <div class="notice"><strong>How this catalog works:</strong> card data and artwork are loaded live from TCGdex. Your checklist is saved in this browser. Click a set heading to collapse/expand it. Use Export Collection to back up your checked cards and Import Collection to restore them on another device.<div class="actions"><button class="ghost" id="exportBtn">Export Collection</button><button class="ghost" id="importBtn">Import Collection</button><input id="importFile" type="file" accept="application/json" hidden></div></div><div id="localWarning" class="notice local-warning"><strong>Local-file mode:</strong> this copy is being opened directly from a file. Some iPhone/iPad browsers block the live card request in this mode. The hosted version uses the same file at a normal HTTPS address and avoids that issue.</div>
   <div id="loading" class="loading"><div class="spinner"></div><strong>Building the master catalog…</strong><br><span class="small">Pulling every IR and SIR, then grouping them by set.</span></div>
   <div id="app"></div>
 </main>
-<footer>Fan-made collector catalog. Pokémon, card names, artwork, and related marks are property of The Pokémon Company / Nintendo / Creatures / GAME FREAK. Data/images are displayed from their source services and are not bundled into this file.</footer>
+<footer>Fan-made collector catalog. Pokémon, card names, artwork, and related marks are property of The Pokémon Company / Nintendo / Creatures / GAME FREAK. Card data and images are displayed from TCGdex and are not bundled into this file.</footer>
 <script>
 const CUTOFF = new Date('2026-09-12T23:59:59');
-const API = 'https://api.pokemontcg.io/v2/cards';
+const API = 'https://api.tcgdex.net/v2/en';
 const state = {cards:[], filter:'all', missing:false, search:''};
 const $ = s => document.querySelector(s);
 const esc = s => String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 function ownedKey(id){return 'pokemon-ir-sir-owned:'+id}
 function isOwned(id){return localStorage.getItem(ownedKey(id))==='1'}
 function setOwned(id,v){v?localStorage.setItem(ownedKey(id),'1'):localStorage.removeItem(ownedKey(id))}
-async function fetchRarity(rarity){
-  let page=1, out=[];
-  while(true){
-    const q = `rarity:\"${rarity}\"`;
-    const url = `${API}?q=${encodeURIComponent(q)}&page=${page}&pageSize=250&orderBy=set.releaseDate,-number`;
-    const r = await fetch(url);
-    if(!r.ok) throw new Error(`Pokémon TCG API returned ${r.status}`);
-    const j = await r.json();
-    out.push(...(j.data||[]));
-    if(out.length >= (j.totalCount||0) || !(j.data||[]).length) break;
-    page++;
-  }
-  return out;
+async function getJSON(url){
+  const r=await fetch(url,{headers:{'Accept':'application/json'}});
+  if(!r.ok) throw new Error(`TCGdex returned ${r.status}`);
+  return r.json();
 }
+async function fetchRarity(name){
+  const j=await getJSON(`${API}/rarities/${encodeURIComponent(name)}`);
+  return Array.isArray(j) ? j : (j.cards||[]);
+}
+function findSet(cardId, sets){
+  return sets.find(s=>cardId.startsWith(s.id+'-')) || null;
+}
+function imageURL(base){return base ? `${base}/high.webp` : ''}
 async function load(){
   try{
-    const [irs,sirs]=await Promise.all([fetchRarity('Illustration Rare'),fetchRarity('Special Illustration Rare')]);
+    const [irs,sirs,sets]=await Promise.all([
+      fetchRarity('Illustration rare'),
+      fetchRarity('Special illustration rare'),
+      getJSON(`${API}/sets`)
+    ]);
+    const normalize=(c,rarity)=>{
+      const set=findSet(c.id,sets);
+      return {...c, rarity, number:c.localId, set:{...set, series:set?.serie?.name||set?.serie||'', releaseDate:set?.releaseDate||''}, images:{large:imageURL(c.image),small:imageURL(c.image)}};
+    };
     const seen=new Set();
-    state.cards=[...irs,...sirs].filter(c=>{
+    state.cards=[...irs.map(c=>normalize(c,'Illustration Rare')),...sirs.map(c=>normalize(c,'Special Illustration Rare'))].filter(c=>{
       if(seen.has(c.id)) return false; seen.add(c.id);
-      const d=new Date((c.set?.releaseDate||'2999/01/01').replaceAll('/','-'));
-      return d<=CUTOFF;
+      if(!c.set?.releaseDate) return true;
+      const d=new Date(String(c.set.releaseDate).replaceAll('/','-'));
+      return !Number.isNaN(d.getTime()) && d<=CUTOFF;
     }).sort((a,b)=>{
       const da=a.set?.releaseDate||'', db=b.set?.releaseDate||'';
       if(da!==db) return db.localeCompare(da);
-      return Number(a.number)-Number(b.number);
+      return String(a.number).localeCompare(String(b.number),undefined,{numeric:true});
     });
     $('#loading').remove(); render();
   }catch(e){
-    $('#loading').innerHTML=`<div class="notice error"><strong>Couldn’t load the live catalog.</strong><br>${esc(e.message)}<br><br>This file needs an internet connection when opened because the card images are intentionally not embedded. Try opening it in Safari, Chrome, Edge, or Firefox. If your browser blocks local-file API requests, serve the file from any simple local web server.</div>`;
+    $('#loading').innerHTML=`<div class="notice error"><strong>Couldn’t load the live catalog.</strong><br>${esc(e.message)}<br><br>The tracker is online, but its card-data service did not answer correctly. Refresh once; if the error remains, the service may be temporarily unavailable.</div>`;
     $('#stats').textContent='Load failed';
   }
 }
@@ -140,7 +148,7 @@ function render(){
     return true;
   });
   const groups=new Map();
-  for(const c of cards){const k=c.set?.id||c.set?.name||'Unknown';if(!groups.has(k), false){};if(!groups.has(k)) groups.set(k,{set:c.set,cards:[]});groups.get(k).cards.push(c)}
+  for(const c of cards){const k=c.set?.id||c.set?.name||'Unknown';if(!groups.has(k)) groups.set(k,{set:c.set,cards:[]});groups.get(k).cards.push(c)}
   let html='';
   for(const {set,cards:cs} of groups.values()){
     const ir=cs.filter(c=>c.rarity==='Illustration Rare'), sir=cs.filter(c=>c.rarity==='Special Illustration Rare');
