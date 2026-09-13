@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Pokémon Special Art Master Tracker</title>
-<meta name="catalog-audit" content="2026-09-13-assets-taxonomy-v1" />
-<meta name="app-version" content="v19" />
+<title>Pokémon IR + SIR Master Tracker</title>
+<meta name="catalog-audit" content="2026-09-13-ir-sir-reset" />
+<meta name="app-version" content="v20-ir-sir-reset" />
 <style>
 :root{
   --bg:#0d1020; --panel:#151a31; --panel2:#1d2442; --ink:#f4f7ff; --muted:#aeb9d9;
@@ -242,7 +242,7 @@ body{padding-bottom:0!important}
       <div class="pokeball" aria-hidden="true"></div>
       <div>
         <h1>Pokémon <span>Special Art</span><br>Master Tracker</h1>
-        <p>English special-art and chase cards across eras — grouped by expansion with live card art and collection tracking.</p>
+        <p>English Illustration Rares and Special Illustration Rares — grouped by expansion with live card art and collection tracking.</p>
       </div>
     </div>
   </header>
@@ -255,12 +255,6 @@ body{padding-bottom:0!important}
 
     <div class="v11-tabs" aria-label="Card categories">
       <button id="allBtn" class="active">All</button>
-      <button id="faBtn">Full Art</button>
-      <button id="afaBtn">Alt Full Art</button>
-      <button id="aasBtn">Alt Art Secret</button>
-      <button id="tgBtn">Trainer Gallery</button>
-      <button id="ggBtn">Galarian Gallery</button>
-      <button id="goldBtn">Gold</button>
       <button id="irBtn">IR</button>
       <button id="sirBtn">SIR</button>
     </div>
@@ -622,86 +616,69 @@ function isCelebrationsGoldMew(card,set){
 
 async function load(){
   try{
-    const [irs,sirs,goldHyper,goldMega,secrets,ultras,fullArtTrainers,setBriefs,promoAltCards]=await Promise.all([
-      safeRarity('Illustration rare'), safeRarity('Special illustration rare'),
-      safeRarity('Hyper Rare'), safeRarity('Mega Hyper Rare'), safeRarity('Secret Rare'),
-      safeRarity('Ultra Rare'), safeRarity('Full Art Trainer'), getJSON(`${API}/sets`),
-      Promise.all(['swshp-SWSH179','swshp-SWSH180','swshp-SWSH181','swshp-SWSH182','swshp-SWSH183','swshp-SWSH184','swshp-SWSH204'].map(safeCard))
+    const [irs,sirs,setBriefs]=await Promise.all([
+      safeRarity('Illustration rare'),
+      safeRarity('Special illustration rare'),
+      getJSON(`${API}/sets`)
     ]);
-    const galleryBriefs=setBriefs.filter(s=>/trainer gallery|galarian gallery/i.test(s.name||''));
-    const subsetGoldBriefs=setBriefs.filter(s=>/hidden fates.*shiny vault|shining fates.*shiny vault/i.test(s.name||''));
-    const altSecrets=secrets.filter(c=>ALT_ART_SECRET_IDS.has(c.id));
-    const altFullArts=[...ultras.filter(c=>ALT_FULL_ART_IDS.has(c.id)),...promoAltCards.filter(Boolean).filter(c=>ALT_FULL_ART_IDS.has(c.id))];
-    const movedGoldSecrets=secrets.filter(c=>!ALT_ART_SECRET_IDS.has(c.id)&&isGoldSecret(c,setBriefs));
-    const celebrationsGold=secrets.filter(c=>{
-      const s=findSet(c.id,setBriefs);
-      return s && isCelebrationsGoldMew(c,s);
-    });
-    const initial=[...irs,...sirs,...goldHyper,...goldMega,...movedGoldSecrets,...celebrationsGold,...altSecrets,...altFullArts,...ultras,...fullArtTrainers];
-    const needed=new Set(initial.map(c=>findSet(c.id,setBriefs)?.id).filter(Boolean));
-    galleryBriefs.forEach(s=>needed.add(s.id));
-    subsetGoldBriefs.forEach(s=>needed.add(s.id));
+
+    const sourceCards=[...irs,...sirs];
+    const needed=new Set(sourceCards.map(c=>findSet(c.id,setBriefs)?.id).filter(Boolean));
     const fullSets=await Promise.all([...needed].map(id=>getJSON(`${API}/sets/${encodeURIComponent(id)}`)));
     const fullSetMap=new Map(fullSets.map(set=>[set.id,set]));
-    const normalize=(c,label,code,setOverride)=>{
-      const brief=setOverride||findSet(c.id,setBriefs); const set=fullSetMap.get(brief?.id)||setOverride||brief;
+
+    const normalize=(c,label,code)=>{
+      const brief=findSet(c.id,setBriefs);
+      const set=fullSetMap.get(brief?.id)||brief;
       const setId=set?.id||brief?.id||'';
       const imageFallbacks=cardImageFallbacks(c,setId,code);
       const logoChoices=setLogoFallbacks(set,setId,code);
-      return {...c, categoryLabel:label, categoryCode:code, number:c.localId,
-        set:{...set,logo:logoChoices[0]||'',logoFallbacks:logoChoices,series:set?.serie?.name||'',releaseDate:set?.releaseDate||''},
-        images:{large:imageFallbacks[0]||'',small:imageFallbacks[0]||'',fallbacks:imageFallbacks}};
+      return {
+        ...c,
+        categoryLabel:label,
+        categoryCode:code,
+        categoryCodes:[code],
+        number:c.localId,
+        set:{
+          ...set,
+          logo:logoChoices[0]||'',
+          logoFallbacks:logoChoices,
+          series:set?.serie?.name||'',
+          releaseDate:set?.releaseDate||''
+        },
+        images:{
+          large:imageFallbacks[0]||'',
+          small:imageFallbacks[0]||'',
+          fallbacks:imageFallbacks
+        }
+      };
     };
-    const regularFullArts=ultras.filter(c=>{
-      if(ALT_FULL_ART_IDS.has(c.id))return false;
-      const s=findSet(c.id,setBriefs),full=fullSetMap.get(s?.id);
-      if(!full)return false;
-      const n=numericSuffix(c.localId);
-      const sameName=(full.cards||[]).filter(x=>String(x.name||'').trim().toLowerCase()===String(c.name||'').trim().toLowerCase());
-      return sameName.some(x=>{const xn=numericSuffix(x.localId);return Number.isFinite(xn)&&Number.isFinite(n)&&xn<n});
-    });
-    let cards=[
-      ...regularFullArts.map(c=>normalize(c,'Full Art','FA')),
-      ...fullArtTrainers.map(c=>normalize(c,'Full Art','FA')),
-      ...altFullArts.map(c=>normalize(c,'Alternate Full Art','AFA')),
-      ...altSecrets.map(c=>normalize(c,'Alternate Art Secret','AAS')),
-      ...movedGoldSecrets.map(c=>normalize(c,'Gold Secret Rare','GOLD')),
-      ...goldHyper.map(c=>normalize(c,'Hyper Rare (Gold)','GOLD')),
-      ...goldMega.map(c=>normalize(c,'Mega Hyper Rare (Gold)','GOLD')),
+
+    const cards=[
       ...irs.map(c=>normalize(c,'Illustration Rare','IR')),
       ...sirs.map(c=>normalize(c,'Special Illustration Rare','SIR'))
     ];
-    for(const set of fullSets){
-      const n=set.name||'';
-      if(/trainer gallery|galarian gallery/i.test(n)){
-        const code=/galarian gallery/i.test(n)?'GG':'TG';
-        const label=code==='GG'?'Galarian Gallery':'Trainer Gallery';
-        for(const c of (set.cards||[])){
-          cards.push(normalize(c,label,code,set));
-          if(isSpecialGoldSubsetCard(c,set)) cards.push(normalize(c,'Gold','GOLD',set));
-        }
-      }else if(/hidden fates.*shiny vault|shining fates.*shiny vault/i.test(n)){
-        for(const c of (set.cards||[])){
-          if(isSpecialGoldSubsetCard(c,set)) cards.push(normalize(c,'Gold','GOLD',set));
-        }
-      }
-    }
-    const priority={FA:1,AFA:2,AAS:3,TG:4,GG:5,GOLD:6,IR:7,SIR:8};
-    const byId=new Map();
-    for(const c of cards){
-      const old=byId.get(c.id);
-      if(!old){
-        byId.set(c.id,{...c,categoryCodes:[c.categoryCode]});
-      }else{
-        const mergedCodes=[...new Set([...(old.categoryCodes||[old.categoryCode]),c.categoryCode])];
-        const winner=priority[c.categoryCode]>priority[old.categoryCode]?c:old;
-        byId.set(c.id,{...winner,categoryCodes:mergedCodes});
-      }
-    }
-    state.cards=[...byId.values()].filter(c=>{if(!c.set?.releaseDate)return true;const t=parseReleaseDate(c.set.releaseDate);return t&&t<=CUTOFF.getTime()}).sort((a,b)=>{const da=parseReleaseDate(a.set?.releaseDate),db=parseReleaseDate(b.set?.releaseDate);if(da!==db)return db-da;return String(a.number).localeCompare(String(b.number),undefined,{numeric:true})});
+
+    const byId=new Map(cards.map(c=>[c.id,c]));
+    state.cards=[...byId.values()]
+      .filter(c=>{
+        if(!c.set?.releaseDate)return true;
+        const t=parseReleaseDate(c.set.releaseDate);
+        return t&&t<=CUTOFF.getTime();
+      })
+      .sort((a,b)=>{
+        const da=parseReleaseDate(a.set?.releaseDate),db=parseReleaseDate(b.set?.releaseDate);
+        if(da!==db)return db-da;
+        return String(a.number).localeCompare(String(b.number),undefined,{numeric:true});
+      });
+
     state.allOrder=[...state.cards].sort(()=>Math.random()-.5).map(c=>c.id);
-    $('#loading').remove(); render();
-  }catch(e){$('#loading').innerHTML=`<div class="notice error"><strong>Couldn’t load the live catalog.</strong><br>${esc(e.message)}</div>`;$('#stats').textContent='Load failed'}
+    $('#loading').remove();
+    render();
+  }catch(e){
+    $('#loading').innerHTML=`<div class="notice error"><strong>Couldn’t load the live catalog.</strong><br>${esc(e.message)}</div>`;
+    $('#stats').textContent='Load failed';
+  }
 }
 function completionClass(pct){return pct===100?'c100':pct>=75?'c75':pct>=50?'c50':pct>=25?'c25':''}
 function completionLabel(pct){return pct===100?'COMPLETE':pct>=75?'75%+':pct>=50?'HALFWAY':pct>=25?'25%+':''}
@@ -806,10 +783,10 @@ function setFilter(f){
  const reshuffle=f==='all'&&state.filter==='all';
  state.filter=f;
  if(reshuffle)state.allOrder=[...state.cards].sort(()=>Math.random()-.5).map(c=>c.id);
- ['all','fa','afa','aas','tg','gg','gold','ir','sir'].forEach(x=>$('#'+x+'Btn').classList.toggle('active',x===f));
+ ['all','ir','sir'].forEach(x=>$('#'+x+'Btn').classList.toggle('active',x===f));
  render()
 }
-$('#allBtn').onclick=()=>setFilter('all');$('#faBtn').onclick=()=>setFilter('fa');$('#afaBtn').onclick=()=>setFilter('afa');$('#irBtn').onclick=()=>setFilter('ir');$('#sirBtn').onclick=()=>setFilter('sir');$('#tgBtn').onclick=()=>setFilter('tg');$('#ggBtn').onclick=()=>setFilter('gg');$('#aasBtn').onclick=()=>setFilter('aas');$('#goldBtn').onclick=()=>setFilter('gold');
+$('#allBtn').onclick=()=>setFilter('all');$('#irBtn').onclick=()=>setFilter('ir');$('#sirBtn').onclick=()=>setFilter('sir');
 $('#sortSelect').onchange=e=>{state.sort=e.target.value;render()};
 $('#randomBtn').onclick=()=>{const missing=state.cards.filter(c=>!isOwned(c.id));if(!missing.length){alert('You own every card in the tracker. Absolute menace.');return}const c=missing[Math.floor(Math.random()*missing.length)];state.openSetId=c.set?.id||c.set?.name;render();requestAnimationFrame(()=>requestAnimationFrame(()=>{document.querySelector(`.card[data-id="${CSS.escape(c.id)}"]`)?.scrollIntoView({behavior:'smooth',block:'center'});openCardModal(c.id)}))};
 $('#modalClose').onclick=closeCardModal;$('#cardModal').addEventListener('click',e=>{if(e.target===$('#cardModal'))closeCardModal()});document.addEventListener('keydown',e=>{if(e.key==='Escape')closeCardModal()});
