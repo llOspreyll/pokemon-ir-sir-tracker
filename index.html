@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Pokémon Special Art Master Tracker</title>
-<meta name="app-version" content="v12" />
+<meta name="app-version" content="v13" />
 <style>
 :root{
   --bg:#0d1020; --panel:#151a31; --panel2:#1d2442; --ink:#f4f7ff; --muted:#aeb9d9;
@@ -357,6 +357,18 @@ function categoryLabel(c){return c.categoryLabel||c.rarity||'Special Art'}
 function categoryCode(c){return c.categoryCode||'ART'}
 function categoryClass(c){return (c.categoryCode||'art').toLowerCase()}
 
+
+const SUBSET_LOGO_PARENT={
+  'swsh4.5sv':'swsh4.5',
+  'sm11.5sv':'sm11.5'
+};
+function subsetParentLogo(setId){
+  const parent=SUBSET_LOGO_PARENT[setId];
+  if(!parent)return '';
+  const series=parent.startsWith('swsh')?'swsh':'sm';
+  return `https://assets.tcgdex.net/en/${series}/${parent}/logo`;
+}
+
 const GALLERY_ASSET_PARENT={
   'swsh9tg':'swsh9','swsh9.5tg':'swsh9',
   'swsh10tg':'swsh10','swsh10.5tg':'swsh10',
@@ -375,6 +387,23 @@ function galleryParentLogo(setId){
   if(!parent)return '';
   return `https://assets.tcgdex.net/en/swsh/${parent}/logo`;
 }
+const SWSH_GOLD_START={
+  'swsh1':211,
+  'swsh2':204,
+  'swsh3':197,
+  'swsh3.5':79,
+  'swsh4':198,
+  'swsh4.5':9999,
+  'swsh5':178,
+  'swsh6':222,
+  'swsh7':226,
+  'swsh8':280,
+  'swsh9':181,
+  'swsh10':208,
+  'swsh10.5':86,
+  'swsh11':212,
+  'swsh12':210
+};
 const ALT_FULL_ART_IDS=new Set([
   'swsh5-146',
   'swsh5-151',
@@ -433,6 +462,29 @@ const ALT_ART_SECRET_IDS=new Set([
   'swsh7-205','swsh7-209','swsh7-212','swsh7-215','swsh7-218','swsh7-220',
   'swsh8-266','swsh8-269','swsh8-270','swsh8-271'
 ]);
+
+function secretSetId(card,setBriefs){
+  const brief=findSet(card.id,setBriefs);
+  return brief?.id||String(card.id||'').split('-')[0]||'';
+}
+function isSwordShieldGoldSecret(card,setBriefs){
+  const sid=secretSetId(card,setBriefs);
+  const start=SWSH_GOLD_START[sid];
+  if(!start)return false;
+  const n=parseInt(card.localId,10);
+  return Number.isFinite(n)&&n>=start;
+}
+function isRainbowEraSecret(card,setBriefs){
+  const sid=secretSetId(card,setBriefs);
+  // Rainbow Rare was introduced in Sun & Moon. Do not label older BW/XY
+  // Secret Rares as Rainbow just because the API rarity says Secret Rare.
+  const brief=findSet(card.id,setBriefs);
+  const series=(brief?.serie?.name||brief?.series||'').toLowerCase();
+  if(sid.startsWith('swsh'))return true;
+  if(sid.startsWith('sm'))return !/shiny vault/i.test(brief?.name||'');
+  return /sun\s*&\s*moon/i.test(series);
+}
+
 async function load(){
   try{
     const [irs,sirs,goldHyper,goldMega,secrets,ultras,fullArtTrainers,setBriefs]=await Promise.all([
@@ -443,8 +495,13 @@ async function load(){
     const galleryBriefs=setBriefs.filter(s=>/trainer gallery|galarian gallery/i.test(s.name||''));
     const altSecrets=secrets.filter(c=>ALT_ART_SECRET_IDS.has(c.id));
     const altFullArts=ultras.filter(c=>ALT_FULL_ART_IDS.has(c.id));
-    const rainbowSecrets=secrets.filter(c=>!ALT_ART_SECRET_IDS.has(c.id));
-    const initial=[...irs,...sirs,...goldHyper,...goldMega,...altSecrets,...altFullArts,...rainbowSecrets,...ultras,...fullArtTrainers];
+    const movedGoldSecrets=secrets.filter(c=>!ALT_ART_SECRET_IDS.has(c.id)&&isSwordShieldGoldSecret(c,setBriefs));
+    const rainbowSecrets=secrets.filter(c=>
+      !ALT_ART_SECRET_IDS.has(c.id) &&
+      !isSwordShieldGoldSecret(c,setBriefs) &&
+      isRainbowEraSecret(c,setBriefs)
+    );
+    const initial=[...irs,...sirs,...goldHyper,...goldMega,...movedGoldSecrets,...altSecrets,...altFullArts,...rainbowSecrets,...ultras,...fullArtTrainers];
     const needed=new Set(initial.map(c=>findSet(c.id,setBriefs)?.id).filter(Boolean));
     galleryBriefs.forEach(s=>needed.add(s.id));
     const fullSets=await Promise.all([...needed].map(id=>getJSON(`${API}/sets/${encodeURIComponent(id)}`)));
@@ -474,6 +531,7 @@ async function load(){
       ...altFullArts.map(c=>normalize(c,'Alternate Full Art','AFA')),
       ...altSecrets.map(c=>normalize(c,'Alternate Art Secret','AAS')),
       ...rainbowSecrets.map(c=>normalize(c,'Rainbow / Secret','RAINBOW')),
+      ...movedGoldSecrets.map(c=>normalize(c,'Gold Secret Rare','GOLD')),
       ...goldHyper.map(c=>normalize(c,'Hyper Rare (Gold)','GOLD')),
       ...goldMega.map(c=>normalize(c,'Mega Hyper Rare (Gold)','GOLD')),
       ...irs.map(c=>normalize(c,'Illustration Rare','IR')),
@@ -511,11 +569,15 @@ function closeCardModal(){$('#cardModal').classList.remove('show');$('#cardModal
 function render(){
  const q=state.search.trim().toLowerCase();
  let cards=state.cards.filter(c=>{
+   if(state.filter==='rainbow'&&/shiny vault/i.test(c.set?.name||''))return false;
    if(state.filter!=='all'&&c.categoryCode.toLowerCase()!==state.filter)return false;
    if(q&&!`${c.name} ${c.set?.name} ${c.number} ${categoryLabel(c)}`.toLowerCase().includes(q))return false;
    return true
  });
 
+ if(state.filter==='rainbow'&&!q){
+   // Keep the category clean: actual Rainbow-era Secret Rares only.
+ }
  if(state.filter==='all'){
    const pos=new Map(state.allOrder.map((id,i)=>[id,i]));
    cards=[...cards].sort((a,b)=>(pos.get(a.id)??999999)-(pos.get(b.id)??999999));
