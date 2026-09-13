@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Pokémon TCG IR & SIR Master Catalog</title>
-<meta name="app-version" content="v6" />
+<meta name="app-version" content="v7" />
 <style>
 :root{
   --bg:#0d1020; --panel:#151a31; --panel2:#1d2442; --ink:#f4f7ff; --muted:#aeb9d9;
@@ -53,6 +53,7 @@ main{max-width:1220px;margin:0 auto;padding:22px 16px 60px}
 footer{text-align:center;color:var(--muted);font-size:12px;padding:25px;border-top:1px solid var(--line)}
 .small{font-size:12px;color:var(--muted)}.set-head{cursor:pointer}.set-chevron{font-size:20px;line-height:1;transition:transform .2s ease;margin-left:8px}.set-head[aria-expanded="true"] .set-chevron{transform:rotate(180deg)}.set-progress{height:7px;background:#0a0d18;border:1px solid var(--line);border-radius:999px;overflow:hidden;margin-top:8px;max-width:340px}.set-progress span{display:block;height:100%;background:linear-gradient(90deg,var(--green),var(--gold))}.set-body.collapsed{display:none}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.ghost{font-size:12px;padding:7px 10px}.local-warning{display:none}.local-warning.show{display:block}
 
+.backup-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 14px;padding:8px 2px}.backup-row .actions{margin:0}.backup-row .ghost{padding:7px 10px}
 .dashboard{max-width:1220px;margin:0 auto 18px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.dash-card{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:14px;padding:13px 14px}.dash-label{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-weight:800}.dash-value{font-size:21px;font-weight:900;margin-top:2px}.dash-sub{font-size:11px;color:var(--muted);margin-top:2px}.sort-select{background:var(--panel);border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:10px 30px 10px 10px;font-weight:700}.set-main{display:flex;gap:13px;align-items:center;min-width:0}.set-logo{width:116px;height:52px;object-fit:contain;flex:0 0 auto}.set-logo-fallback{width:52px;height:52px;border-radius:12px;background:var(--panel);border:1px solid var(--line);display:grid;place-items:center;font-weight:950;color:var(--muted);flex:0 0 auto}.set-copy{min-width:0}.completion-badge{display:inline-block;margin-left:7px;padding:3px 7px;border-radius:999px;font-size:9px;font-weight:950;vertical-align:middle;border:1px solid currentColor;letter-spacing:.5px}.completion-badge.c25{color:var(--blue)}.completion-badge.c50{color:#c6d4ff}.completion-badge.c75{color:var(--gold)}.completion-badge.c100{color:var(--green)}.owned-toggle{width:100%;margin-top:8px;padding:7px 8px;font-size:11px;border-radius:9px}.owned-toggle.on{background:var(--green);color:#07150f;border-color:var(--green)}.card-click{cursor:pointer}.modal-backdrop{position:fixed;inset:0;background:rgba(4,6,14,.82);z-index:60;display:none;align-items:center;justify-content:center;padding:18px;backdrop-filter:blur(8px)}.modal-backdrop.show{display:flex}.modal{width:min(860px,100%);max-height:92vh;overflow:auto;background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);position:relative;padding:18px}.modal-close{position:absolute;top:12px;right:12px;width:38px;height:38px;border-radius:50%;z-index:2}.modal-grid{display:grid;grid-template-columns:minmax(240px,360px) 1fr;gap:22px;align-items:center}.modal img{width:100%;border-radius:14px;background:#0a0d18}.modal h2{font-size:30px;line-height:1.1;margin:0 44px 8px 0}.modal-meta{color:var(--muted);margin-bottom:14px}.modal-owned{font-size:14px;padding:11px 15px}
 @media(max-width:760px){.toolbar{grid-template-columns:1fr}.stats{text-align:left}.set-head{align-items:start;flex-direction:column}.counts{justify-content:start}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.dashboard{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.dash-card{padding:11px}.dash-value{font-size:18px}.set-main{align-items:flex-start}.set-logo{width:92px;height:42px}.card{padding:7px;border-radius:12px}.card h3{font-size:13px}.card p{font-size:11px}.rarity-pill{font-size:9px}.owned-toggle{padding:7px 5px}.modal-grid{grid-template-columns:1fr}.modal{padding:14px}.modal img{max-height:58vh;object-fit:contain}.modal h2{font-size:24px}.controls{gap:6px}.sort-select{width:100%}}
 @media print{.toolbar-wrap,.notice,.check,footer{display:none!important}body{background:#fff;color:#111}.hero{padding:20px;border:0}.hero .pokeball{display:none}.subtitle,.set-meta,.card p{color:#555}.set{break-before:page}.card{break-inside:avoid;background:#fff;border:1px solid #ddd;box-shadow:none}.grid{grid-template-columns:repeat(4,1fr);gap:8px}.rarity-pill.ir{color:#8a6500}.rarity-pill.sir{color:#a1265d}.count{background:#fff}.set-head{border-color:#bbb}}
@@ -69,14 +70,14 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:25px;border-t
   <div class="toolbar">
     <input id="search" type="search" placeholder="Search a card or set…" autocomplete="off" />
     <div class="controls">
-      <button id="allBtn" class="active">All</button><button id="irBtn">IR</button><button id="sirBtn">SIR</button><button id="missingBtn">Missing only</button><button id="randomBtn">Pick a Missing Card</button>
+      <button id="allBtn" class="active">All</button><button id="irBtn">IR</button><button id="sirBtn">SIR</button><button id="randomBtn">🎲 Who’s Next?</button>
       <select id="sortSelect" class="sort-select" aria-label="Sort sets"><option value="newest">Newest → Oldest</option><option value="oldest">Oldest → Newest</option><option value="az">Set Name A–Z</option></select>
     </div>
     <div class="stats"><span id="stats">Loading catalog…</span><div class="progress"><span id="overallBar"></span></div></div>
   </div>
 </div>
 <main>
-  <div class="notice"><strong>How this catalog works:</strong> card data and artwork are loaded live from TCGdex. Your checklist is saved in this browser. Sets are ordered by release date, and cards are ordered by card number. Open one set at a time by tapping its heading; opening another automatically collapses the rest. Use Export Collection to back up your checked cards and Import Collection to restore them on another device.<div class="actions"><button class="ghost" id="exportBtn">Export Collection</button><button class="ghost" id="importBtn">Import Collection</button><input id="importFile" type="file" accept="application/json" hidden></div></div><div id="localWarning" class="notice local-warning"><strong>Local-file mode:</strong> this copy is being opened directly from a file. Some iPhone/iPad browsers block the live card request in this mode. The hosted version uses the same file at a normal HTTPS address and avoids that issue.</div>
+  <div class="backup-row"><span class="small">Collection saves automatically on this device.</span><div class="actions"><button class="ghost" id="exportBtn">Backup</button><button class="ghost" id="importBtn">Restore</button><input id="importFile" type="file" accept="application/json" hidden></div></div><div id="localWarning" class="notice local-warning"><strong>Local-file mode:</strong> this copy is being opened directly from a file. Some iPhone/iPad browsers block the live card request in this mode. The hosted version uses the same file at a normal HTTPS address and avoids that issue.</div>
   <div id="dashboard" class="dashboard" hidden></div>
   <div id="loading" class="loading"><div class="spinner"></div><strong>Building the master catalog…</strong><br><span class="small">Pulling every IR and SIR, set logos, and release dates.</span></div>
   <div id="app"></div>
@@ -105,7 +106,7 @@ function findSet(cardId, sets){
   return sets.filter(s=>cardId.startsWith(s.id+'-')).sort((a,b)=>b.id.length-a.id.length)[0] || null;
 }
 function imageURL(base,quality='high'){return base ? `${base}/${quality}.webp` : ''}
-function assetURL(base){return base ? `${base}.webp` : ''}
+function assetURL(base){if(!base)return ''; const s=String(base); return /\.(?:webp|png|jpe?g)(?:[?#].*)?$/i.test(s)?s:`${s}.webp`}
 function parseReleaseDate(value){
   if(!value) return 0;
   const raw=String(value).trim();
@@ -236,7 +237,6 @@ function renderStats(){const owned=state.cards.filter(c=>isOwned(c.id)).length;c
 $('#search').addEventListener('input',e=>{state.search=e.target.value;render()});
 function setFilter(f){state.filter=f;['all','ir','sir'].forEach(x=>$('#'+x+'Btn').classList.toggle('active',x===f));render()}
 $('#allBtn').onclick=()=>setFilter('all'); $('#irBtn').onclick=()=>setFilter('ir'); $('#sirBtn').onclick=()=>setFilter('sir');
-$('#missingBtn').onclick=e=>{state.missing=!state.missing;e.currentTarget.classList.toggle('active',state.missing);render()};
 $('#sortSelect').onchange=e=>{state.sort=e.target.value;render()};
 $('#randomBtn').onclick=()=>{const missing=state.cards.filter(c=>!isOwned(c.id));if(!missing.length){alert('You own every card in the tracker. Absolute menace.');return;}const c=missing[Math.floor(Math.random()*missing.length)];state.openSetId=c.set?.id||c.set?.name;render();requestAnimationFrame(()=>requestAnimationFrame(()=>{const target=document.querySelector(`.card[data-id="${CSS.escape(c.id)}"]`);if(target)target.scrollIntoView({behavior:'smooth',block:'center'});openCardModal(c.id);}));};
 $('#modalClose').onclick=closeCardModal;$('#cardModal').addEventListener('click',e=>{if(e.target===$('#cardModal'))closeCardModal()});document.addEventListener('keydown',e=>{if(e.key==='Escape')closeCardModal()});
