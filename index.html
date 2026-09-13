@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Pokémon Special Art Master Tracker</title>
-<meta name="app-version" content="v13" />
+<meta name="app-version" content="v15" />
 <style>
 :root{
   --bg:#0d1020; --panel:#151a31; --panel2:#1d2442; --ink:#f4f7ff; --muted:#aeb9d9;
@@ -231,7 +231,6 @@ body{padding-bottom:0!important}
 }
 .rarity-pill.fa,.count.fa,.rarity-heading.fa{color:#8fc8ff}
 .rarity-pill.afa,.count.afa,.rarity-heading.afa{color:#bda7ff}
-.rarity-pill.rainbow,.count.rainbow,.rarity-heading.rainbow{color:#ff9ed1}
 </style>
 
 </head>
@@ -387,13 +386,28 @@ function galleryParentLogo(setId){
   if(!parent)return '';
   return `https://assets.tcgdex.net/en/swsh/${parent}/logo`;
 }
-const SWSH_GOLD_START={
+const GOLD_SECRET_START={
+  // Sun & Moon — PSA Gold Secret Rare checklist
+  'sm1':158,
+  'sm2':161,
+  'sm3':161,
+  'sm4':120,
+  'sm5':166,
+  'sm6':141,
+  'sm7':178,
+  'sm7.5':75,
+  'sm8':228,
+  'sm9':192,
+  'sm10':229,
+  'sm11':250,
+  'sm12':263,
+
+  // Sword & Shield
   'swsh1':211,
   'swsh2':204,
   'swsh3':197,
-  'swsh3.5':79,
+  'swsh3.5':80,
   'swsh4':198,
-  'swsh4.5':9999,
   'swsh5':178,
   'swsh6':222,
   'swsh7':226,
@@ -467,22 +481,44 @@ function secretSetId(card,setBriefs){
   const brief=findSet(card.id,setBriefs);
   return brief?.id||String(card.id||'').split('-')[0]||'';
 }
-function isSwordShieldGoldSecret(card,setBriefs){
+function isGoldSecret(card,setBriefs){
   const sid=secretSetId(card,setBriefs);
-  const start=SWSH_GOLD_START[sid];
+  const start=GOLD_SECRET_START[sid];
   if(!start)return false;
   const n=parseInt(card.localId,10);
   return Number.isFinite(n)&&n>=start;
 }
-function isRainbowEraSecret(card,setBriefs){
-  const sid=secretSetId(card,setBriefs);
-  // Rainbow Rare was introduced in Sun & Moon. Do not label older BW/XY
-  // Secret Rares as Rainbow just because the API rarity says Secret Rare.
-  const brief=findSet(card.id,setBriefs);
-  const series=(brief?.serie?.name||brief?.series||'').toLowerCase();
-  if(sid.startsWith('swsh'))return true;
-  if(sid.startsWith('sm'))return !/shiny vault/i.test(brief?.name||'');
-  return /sun\s*&\s*moon/i.test(series);
+
+
+function numericSuffix(v){
+  const m=String(v||'').match(/(\d+)$/);
+  return m?Number(m[1]):NaN;
+}
+function isSpecialGoldSubsetCard(card,set){
+  const name=String(set?.name||'').toLowerCase();
+  const local=String(card?.localId||card?.number||'').toUpperCase();
+  const n=numericSuffix(local);
+
+  // Hidden Fates Shiny Vault gold cards: SV87–SV94.
+  if(name.includes('hidden fates') && name.includes('shiny vault'))
+    return /^SV/.test(local) && n>=87 && n<=94;
+
+  // Shining Fates Shiny Vault gold Eternatus pair: SV121–SV122.
+  if(name.includes('shining fates') && name.includes('shiny vault'))
+    return /^SV/.test(local) && n>=121 && n<=122;
+
+  // Every 30-card Sword & Shield Trainer Gallery ends with two gold-and-black VMAX cards.
+  if(name.includes('trainer gallery'))
+    return /^TG/.test(local) && (n===29 || n===30);
+
+  // Crown Zenith's four gold VSTAR cards.
+  if(name.includes('galarian gallery'))
+    return /^GG/.test(local) && n>=67 && n<=70;
+
+  return false;
+}
+function isCelebrationsGoldMew(card,set){
+  return /celebrations/i.test(set?.name||'') && Number(card?.localId)===25 && /mew/i.test(card?.name||'');
 }
 
 async function load(){
@@ -493,17 +529,18 @@ async function load(){
       safeRarity('Ultra Rare'), safeRarity('Full Art Trainer'), getJSON(`${API}/sets`)
     ]);
     const galleryBriefs=setBriefs.filter(s=>/trainer gallery|galarian gallery/i.test(s.name||''));
+    const subsetGoldBriefs=setBriefs.filter(s=>/hidden fates.*shiny vault|shining fates.*shiny vault/i.test(s.name||''));
     const altSecrets=secrets.filter(c=>ALT_ART_SECRET_IDS.has(c.id));
     const altFullArts=ultras.filter(c=>ALT_FULL_ART_IDS.has(c.id));
-    const movedGoldSecrets=secrets.filter(c=>!ALT_ART_SECRET_IDS.has(c.id)&&isSwordShieldGoldSecret(c,setBriefs));
-    const rainbowSecrets=secrets.filter(c=>
-      !ALT_ART_SECRET_IDS.has(c.id) &&
-      !isSwordShieldGoldSecret(c,setBriefs) &&
-      isRainbowEraSecret(c,setBriefs)
-    );
-    const initial=[...irs,...sirs,...goldHyper,...goldMega,...movedGoldSecrets,...altSecrets,...altFullArts,...rainbowSecrets,...ultras,...fullArtTrainers];
+    const movedGoldSecrets=secrets.filter(c=>!ALT_ART_SECRET_IDS.has(c.id)&&isGoldSecret(c,setBriefs));
+    const celebrationsGold=secrets.filter(c=>{
+      const s=findSet(c.id,setBriefs);
+      return s && isCelebrationsGoldMew(c,s);
+    });
+    const initial=[...irs,...sirs,...goldHyper,...goldMega,...movedGoldSecrets,...celebrationsGold,...altSecrets,...altFullArts,...ultras,...fullArtTrainers];
     const needed=new Set(initial.map(c=>findSet(c.id,setBriefs)?.id).filter(Boolean));
     galleryBriefs.forEach(s=>needed.add(s.id));
+    subsetGoldBriefs.forEach(s=>needed.add(s.id));
     const fullSets=await Promise.all([...needed].map(id=>getJSON(`${API}/sets/${encodeURIComponent(id)}`)));
     const fullSetMap=new Map(fullSets.map(set=>[set.id,set]));
     const normalize=(c,label,code,setOverride)=>{
@@ -538,12 +575,32 @@ async function load(){
       ...sirs.map(c=>normalize(c,'Special Illustration Rare','SIR'))
     ];
     for(const set of fullSets){
-      const n=set.name||''; if(!/trainer gallery|galarian gallery/i.test(n)) continue;
-      const code=/galarian gallery/i.test(n)?'GG':'TG'; const label=code==='GG'?'Galarian Gallery':'Trainer Gallery';
-      for(const c of (set.cards||[])) cards.push(normalize(c,label,code,set));
+      const n=set.name||'';
+      if(/trainer gallery|galarian gallery/i.test(n)){
+        const code=/galarian gallery/i.test(n)?'GG':'TG';
+        const label=code==='GG'?'Galarian Gallery':'Trainer Gallery';
+        for(const c of (set.cards||[])){
+          cards.push(normalize(c,label,code,set));
+          if(isSpecialGoldSubsetCard(c,set)) cards.push(normalize(c,'Gold','GOLD',set));
+        }
+      }else if(/hidden fates.*shiny vault|shining fates.*shiny vault/i.test(n)){
+        for(const c of (set.cards||[])){
+          if(isSpecialGoldSubsetCard(c,set)) cards.push(normalize(c,'Gold','GOLD',set));
+        }
+      }
     }
-    const priority={FA:1,AFA:2,AAS:3,RAINBOW:4,TG:5,GG:6,GOLD:7,IR:8,SIR:9}; const byId=new Map();
-    for(const c of cards){const old=byId.get(c.id);if(!old||priority[c.categoryCode]>priority[old.categoryCode])byId.set(c.id,c)}
+    const priority={FA:1,AFA:2,AAS:3,TG:4,GG:5,GOLD:6,IR:7,SIR:8};
+    const byId=new Map();
+    for(const c of cards){
+      const old=byId.get(c.id);
+      if(!old){
+        byId.set(c.id,{...c,categoryCodes:[c.categoryCode]});
+      }else{
+        const mergedCodes=[...new Set([...(old.categoryCodes||[old.categoryCode]),c.categoryCode])];
+        const winner=priority[c.categoryCode]>priority[old.categoryCode]?c:old;
+        byId.set(c.id,{...winner,categoryCodes:mergedCodes});
+      }
+    }
     state.cards=[...byId.values()].filter(c=>{if(!c.set?.releaseDate)return true;const t=parseReleaseDate(c.set.releaseDate);return t&&t<=CUTOFF.getTime()}).sort((a,b)=>{const da=parseReleaseDate(a.set?.releaseDate),db=parseReleaseDate(b.set?.releaseDate);if(da!==db)return db-da;return String(a.number).localeCompare(String(b.number),undefined,{numeric:true})});
     state.allOrder=[...state.cards].sort(()=>Math.random()-.5).map(c=>c.id);
     $('#loading').remove(); render();
@@ -563,21 +620,17 @@ function renderDashboard(){
  <div class="v11-stat"><div class="v11-stat-icon">◆</div><div class="v11-stat-value">${mastered}/${sets.size}</div><div class="v11-stat-label">Sets Mastered</div><div class="v11-stat-sub">completed expansions</div></div>`;
  $('#dashboard').hidden=false;
 }
-function cardHTML(c){const own=isOwned(c.id),cls=categoryClass(c);const img=c.images?.small||c.images?.large||'';return `<article class="card ${own?'owned':''} card-click" data-id="${esc(c.id)}" tabindex="0" role="button"><img loading="lazy" src="${esc(img)}" alt="${esc(c.name)} - ${esc(c.set?.name)} #${esc(c.number)}" /><h3>${esc(c.name)}</h3><p>#${esc(c.number)} · ${esc(c.set?.name)}</p><span class="rarity-pill ${cls}">${esc(categoryCode(c))}</span><button class="owned-toggle ${own?'on':''}" data-owned-action="1">${own?'✓ Owned':'Mark Owned'}</button></article>`}
+function cardHTML(c){const own=isOwned(c.id),displayCode=state.filter==='all'?categoryCode(c):state.filter.toUpperCase(),cls=displayCode.toLowerCase();const img=c.images?.small||c.images?.large||'';return `<article class="card ${own?'owned':''} card-click" data-id="${esc(c.id)}" tabindex="0" role="button"><img loading="lazy" src="${esc(img)}" alt="${esc(c.name)} - ${esc(c.set?.name)} #${esc(c.number)}" /><h3>${esc(c.name)}</h3><p>#${esc(c.number)} · ${esc(c.set?.name)}</p><span class="rarity-pill ${cls}">${esc(displayCode)}</span><button class="owned-toggle ${own?'on':''}" data-owned-action="1">${own?'✓ Owned':'Mark Owned'}</button></article>`}
 function openCardModal(id){const c=state.cards.find(x=>x.id===id);if(!c)return;const own=isOwned(c.id);$('#modalContent').innerHTML=`<div class="modal-grid"><div><img src="${esc(c.images?.large||c.images?.small||'')}" alt="${esc(c.name)}" /></div><div><h2 id="modalTitle">${esc(c.name)}</h2><div class="modal-meta">${esc(c.set?.name)} · #${esc(c.number)} · ${esc(categoryLabel(c))}<br>${esc(displayReleaseDate(c.set?.releaseDate))}${c.set?.series?' · '+esc(c.set.series):''}</div><button class="modal-owned ${own?'active':''}" id="modalOwnedBtn">${own?'✓ Owned':'Mark as Owned'}</button></div></div>`;$('#cardModal').classList.add('show');$('#cardModal').setAttribute('aria-hidden','false');$('#modalOwnedBtn').onclick=()=>{setOwned(c.id,!isOwned(c.id));openCardModal(c.id);render()}}
 function closeCardModal(){$('#cardModal').classList.remove('show');$('#cardModal').setAttribute('aria-hidden','true')}
 function render(){
  const q=state.search.trim().toLowerCase();
  let cards=state.cards.filter(c=>{
-   if(state.filter==='rainbow'&&/shiny vault/i.test(c.set?.name||''))return false;
-   if(state.filter!=='all'&&c.categoryCode.toLowerCase()!==state.filter)return false;
+   const codes=(c.categoryCodes||[c.categoryCode]).map(x=>String(x).toLowerCase());
+   if(state.filter!=='all'&&!codes.includes(state.filter))return false;
    if(q&&!`${c.name} ${c.set?.name} ${c.number} ${categoryLabel(c)}`.toLowerCase().includes(q))return false;
    return true
  });
-
- if(state.filter==='rainbow'&&!q){
-   // Keep the category clean: actual Rainbow-era Secret Rares only.
- }
  if(state.filter==='all'){
    const pos=new Map(state.allOrder.map((id,i)=>[id,i]));
    cards=[...cards].sort((a,b)=>(pos.get(a.id)??999999)-(pos.get(b.id)??999999));
@@ -609,17 +662,17 @@ function render(){
    if(state.openSetId&&!orderedGroups.some(g=>g.id===state.openSetId))state.openSetId=null;
 
    let html='';
-   const order=['FA','AFA','AAS','RAINBOW','TG','GG','GOLD','IR','SIR'];
-   const headings={FA:'Full Art',AFA:'Alternate Full Art',AAS:'Alternate Art Secret',RAINBOW:'Rainbow / Secret',TG:'Trainer Gallery',GG:'Galarian Gallery',GOLD:'Gold Cards',IR:'★ Illustration Rares',SIR:'★★ Special Illustration Rares'};
+   const order=['FA','AFA','AAS','TG','GG','GOLD','IR','SIR'];
+   const headings={FA:'Full Art',AFA:'Alternate Full Art',AAS:'Alternate Art Secret',TG:'Trainer Gallery',GG:'Galarian Gallery',GOLD:'Gold Cards',IR:'★ Illustration Rares',SIR:'★★ Special Illustration Rares'};
 
    for(const {id,set,cards:raw} of orderedGroups){
      const cs=[...raw].sort((a,b)=>String(a.number).localeCompare(String(b.number),undefined,{numeric:true}));
      const ownedSet=cs.filter(c=>isOwned(c.id)).length,pctSet=cs.length?Math.round(ownedSet/cs.length*100):0,open=state.openSetId===id;
      const logo=assetURL(set?.logo),badge=completionLabel(pctSet),badgeClass=completionClass(pctSet);
-     const counts=order.map(k=>{const n=cs.filter(c=>c.categoryCode===k).length;return n?`<span class="count ${k.toLowerCase()}">${n} ${k}</span>`:''}).join('');
+     const counts=order.map(k=>{const n=cs.filter(c=>(c.categoryCodes||[c.categoryCode]).includes(k)).length;return n?`<span class="count ${k.toLowerCase()}">${n} ${k}</span>`:''}).join('');
      html+=`<section class="set" data-set-id="${esc(id)}"><div class="set-head" role="button" tabindex="0" aria-expanded="${open}"><div class="set-main">${logo?`<img class="set-logo" loading="lazy" src="${esc(logo)}" alt="${esc(set?.name||'Set')} logo" onerror="this.style.display='none'">`:`<div class="set-logo-fallback">TCG</div>`}<div class="set-copy"><h2 class="set-title">${esc(set?.name||'Unknown Set')}${badge?`<span class="completion-badge ${badgeClass}">${badge}</span>`:''}</h2><div class="set-meta">${esc(set?.series||'')} · ${esc(displayReleaseDate(set?.releaseDate))} · ${ownedSet}/${cs.length} owned (${pctSet}%)</div><div class="set-progress"><span style="width:${pctSet}%"></span></div></div></div><div class="counts">${counts}<span class="count">${cs.length} total</span><span class="set-chevron">⌄</span></div></div><div class="set-body ${open?'':'collapsed'}">`;
      for(const k of order){
-       const arr=cs.filter(c=>c.categoryCode===k);
+       const arr=cs.filter(c=>(c.categoryCodes||[c.categoryCode]).includes(k));
        if(arr.length)html+=`<h3 class="rarity-heading ${k.toLowerCase()}">${headings[k]}</h3><div class="grid">${arr.map(cardHTML).join('')}</div>`
      }
      html+='</div></section>'
@@ -656,7 +709,7 @@ function setFilter(f){
  const reshuffle=f==='all'&&state.filter==='all';
  state.filter=f;
  if(reshuffle)state.allOrder=[...state.cards].sort(()=>Math.random()-.5).map(c=>c.id);
- ['all','fa','afa','aas','rainbow','tg','gg','gold','ir','sir'].forEach(x=>$('#'+x+'Btn').classList.toggle('active',x===f));
+ ['all','fa','afa','aas','tg','gg','gold','ir','sir'].forEach(x=>$('#'+x+'Btn').classList.toggle('active',x===f));
  render()
 }
 $('#allBtn').onclick=()=>setFilter('all');$('#faBtn').onclick=()=>setFilter('fa');$('#afaBtn').onclick=()=>setFilter('afa');$('#rainbowBtn').onclick=()=>setFilter('rainbow');$('#irBtn').onclick=()=>setFilter('ir');$('#sirBtn').onclick=()=>setFilter('sir');$('#tgBtn').onclick=()=>setFilter('tg');$('#ggBtn').onclick=()=>setFilter('gg');$('#aasBtn').onclick=()=>setFilter('aas');$('#goldBtn').onclick=()=>setFilter('gold');
