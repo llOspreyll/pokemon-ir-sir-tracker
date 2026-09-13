@@ -118,14 +118,23 @@ function displayReleaseDate(value){
 }
 async function load(){
   try{
-    const [irs,sirs,sets]=await Promise.all([
+    const [irs,sirs,setBriefs]=await Promise.all([
       fetchRarity('Illustration rare'),
       fetchRarity('Special illustration rare'),
       getJSON(`${API}/sets`)
     ]);
+
+    // /sets returns Set Brief objects, which intentionally omit releaseDate/serie.
+    // Identify only the sets represented by IR/SIR cards, then fetch each full Set object.
+    const rarityCards=[...irs,...sirs];
+    const neededSetIds=[...new Set(rarityCards.map(c=>findSet(c.id,setBriefs)?.id).filter(Boolean))];
+    const fullSets=await Promise.all(neededSetIds.map(id=>getJSON(`${API}/sets/${encodeURIComponent(id)}`)));
+    const fullSetMap=new Map(fullSets.map(set=>[set.id,set]));
+
     const normalize=(c,rarity)=>{
-      const set=findSet(c.id,sets);
-      return {...c, rarity, number:c.localId, set:{...set, series:set?.serie?.name||set?.serie||'', releaseDate:set?.releaseDate||''}, images:{large:imageURL(c.image),small:imageURL(c.image)}};
+      const brief=findSet(c.id,setBriefs);
+      const set=fullSetMap.get(brief?.id)||brief;
+      return {...c, rarity, number:c.localId, set:{...set, series:set?.serie?.name||'', releaseDate:set?.releaseDate||''}, images:{large:imageURL(c.image),small:imageURL(c.image)}};
     };
     const seen=new Set();
     state.cards=[...irs.map(c=>normalize(c,'Illustration Rare')),...sirs.map(c=>normalize(c,'Special Illustration Rare'))].filter(c=>{
