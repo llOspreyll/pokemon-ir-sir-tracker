@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Pokémon Special Art Master Tracker</title>
-<meta name="app-version" content="v11" />
+<meta name="app-version" content="v12" />
 <style>
 :root{
   --bg:#0d1020; --panel:#151a31; --panel2:#1d2442; --ink:#f4f7ff; --muted:#aeb9d9;
@@ -203,6 +203,37 @@ footer{opacity:.55}
 }
 </style>
 
+
+<style id="v12-fixes">
+body{padding-bottom:0!important}
+.v11-bottom-nav{display:none!important}
+@media(max-width:760px){
+  body{padding-bottom:0!important}
+  .v11-tabs{
+    display:flex!important;
+    flex-wrap:wrap!important;
+    overflow:visible!important;
+    gap:8px!important;
+    padding-bottom:0!important;
+  }
+  .v11-tabs button{
+    flex:0 0 auto!important;
+    padding:9px 13px!important;
+    font-size:13px!important;
+  }
+  .v11-dashboard{margin-top:14px!important}
+  .v11-stat{min-height:118px!important}
+  .v11-stat-icon{font-size:18px!important;opacity:.85}
+  .v11-stat-value{font-size:23px!important}
+  .v11-stat-label{font-size:14px!important}
+  .v11-actions{margin-top:4px!important}
+  .v11-data-tools{margin-top:8px!important}
+}
+.rarity-pill.fa,.count.fa,.rarity-heading.fa{color:#8fc8ff}
+.rarity-pill.afa,.count.afa,.rarity-heading.afa{color:#bda7ff}
+.rarity-pill.rainbow,.count.rainbow,.rarity-heading.rainbow{color:#ff9ed1}
+</style>
+
 </head>
 <body>
 <div class="v11-page">
@@ -272,14 +303,6 @@ footer{opacity:.55}
 
     <div id="app"></div>
   </main>
-
-  <nav class="v11-bottom-nav" aria-label="Quick navigation">
-    <button class="active" id="navHome">⌂<span>Home</span></button>
-    <button id="navSets">▱<span>Sets</span></button>
-    <button id="navCollection">▣<span>Collection</span></button>
-    <button id="navSearch">⌕<span>Search</span></button>
-    <button id="navMore">•••<span>More</span></button>
-  </nav>
 </div>
 
 <footer>Fan-made collector catalog. Pokémon, card names, artwork, and related marks belong to their respective owners. Card data and images are displayed from TCGdex.</footer>
@@ -347,6 +370,63 @@ function galleryAssetImage(setId,localId){
   const series=parent.startsWith('swsh')?'swsh':'';
   return `https://assets.tcgdex.net/en/${series}/${parent}/${localId}`;
 }
+function galleryParentLogo(setId){
+  const parent=GALLERY_ASSET_PARENT[setId];
+  if(!parent)return '';
+  return `https://assets.tcgdex.net/en/swsh/${parent}/logo`;
+}
+const ALT_FULL_ART_IDS=new Set([
+  'swsh5-146',
+  'swsh5-151',
+  'swsh5-153',
+  'swsh5-155',
+  'swsh6-164',
+  'swsh6-166',
+  'swsh6-168',
+  'swsh6-170',
+  'swsh6-172',
+  'swsh6-174',
+  'swsh6-177',
+  'swsh6-179',
+  'swsh6-183',
+  'swsh6-185',
+  'swsh7-167',
+  'swsh7-175',
+  'swsh7-180',
+  'swsh7-182',
+  'swsh7-184',
+  'swsh7-186',
+  'swsh7-189',
+  'swsh7-192',
+  'swsh7-194',
+  'swsh7-196',
+  'swsh7-198',
+  'swsh8-245',
+  'swsh8-251',
+  'swsh8-252',
+  'swsh8-255',
+  'swsh8-257',
+  'swsh9-154',
+  'swsh9-156',
+  'swsh9-162',
+  'swsh9-166',
+  'swsh10-161',
+  'swsh10-163',
+  'swsh10-167',
+  'swsh10-172',
+  'swsh10-175',
+  'swsh10-177',
+  'swsh10.5-72',
+  'swsh10.5-74',
+  'swsh11-177',
+  'swsh11-180',
+  'swsh11-184',
+  'swsh11-186',
+  'swsh12-177',
+  'swsh12-181',
+  'swsh12-184',
+  'swsh12-186'
+]);
 const ALT_ART_SECRET_IDS=new Set([
   'swsh5-168','swsh5-170',
   'swsh6-201','swsh6-203','swsh6-205',
@@ -355,13 +435,16 @@ const ALT_ART_SECRET_IDS=new Set([
 ]);
 async function load(){
   try{
-    const [irs,sirs,goldHyper,goldMega,secrets,setBriefs]=await Promise.all([
+    const [irs,sirs,goldHyper,goldMega,secrets,ultras,fullArtTrainers,setBriefs]=await Promise.all([
       safeRarity('Illustration rare'), safeRarity('Special illustration rare'),
-      safeRarity('Hyper Rare'), safeRarity('Mega Hyper Rare'), safeRarity('Secret Rare'), getJSON(`${API}/sets`)
+      safeRarity('Hyper Rare'), safeRarity('Mega Hyper Rare'), safeRarity('Secret Rare'),
+      safeRarity('Ultra Rare'), safeRarity('Full Art Trainer'), getJSON(`${API}/sets`)
     ]);
     const galleryBriefs=setBriefs.filter(s=>/trainer gallery|galarian gallery/i.test(s.name||''));
     const altSecrets=secrets.filter(c=>ALT_ART_SECRET_IDS.has(c.id));
-    const initial=[...irs,...sirs,...goldHyper,...goldMega,...altSecrets];
+    const altFullArts=ultras.filter(c=>ALT_FULL_ART_IDS.has(c.id));
+    const rainbowSecrets=secrets.filter(c=>!ALT_ART_SECRET_IDS.has(c.id));
+    const initial=[...irs,...sirs,...goldHyper,...goldMega,...altSecrets,...altFullArts,...rainbowSecrets,...ultras,...fullArtTrainers];
     const needed=new Set(initial.map(c=>findSet(c.id,setBriefs)?.id).filter(Boolean));
     galleryBriefs.forEach(s=>needed.add(s.id));
     const fullSets=await Promise.all([...needed].map(id=>getJSON(`${API}/sets/${encodeURIComponent(id)}`)));
@@ -370,21 +453,38 @@ async function load(){
       const brief=setOverride||findSet(c.id,setBriefs); const set=fullSetMap.get(brief?.id)||setOverride||brief;
       const galleryBase=(code==='TG'||code==='GG')?galleryAssetImage(set?.id||brief?.id,c.localId):'';
       const base=c.image||galleryBase;
-      return {...c, categoryLabel:label, categoryCode:code, number:c.localId, set:{...set,series:set?.serie?.name||'',releaseDate:set?.releaseDate||''},images:{large:imageURL(base,'high'),small:imageURL(base,'low')}};
+      const galleryLogo=(code==='TG'||code==='GG')?galleryParentLogo(set?.id||brief?.id):'';
+      return {...c, categoryLabel:label, categoryCode:code, number:c.localId,
+        set:{...set,logo:set?.logo||galleryLogo,series:set?.serie?.name||'',releaseDate:set?.releaseDate||''},
+        images:{large:imageURL(base,'high'),small:imageURL(base,'low')}};
     };
+    const regularFullArts=ultras.filter(c=>{
+      if(ALT_FULL_ART_IDS.has(c.id))return false;
+      const s=findSet(c.id,setBriefs);
+      const full=fullSetMap.get(s?.id);
+      const n=parseInt(c.localId,10);
+      const official=full?.cardCount?.official||full?.cardCount?.total||0;
+      // Main-set Ultra Rares near the collector-number tail are overwhelmingly full arts.
+      // This avoids pulling ordinary low-number Ultra Rares from special sets into Full Art.
+      return Number.isFinite(n)&&official&&n>=Math.floor(official*.72);
+    });
     let cards=[
-      ...irs.map(c=>normalize(c,'Illustration Rare','IR')),
-      ...sirs.map(c=>normalize(c,'Special Illustration Rare','SIR')),
+      ...regularFullArts.map(c=>normalize(c,'Full Art','FA')),
+      ...fullArtTrainers.map(c=>normalize(c,'Full Art','FA')),
+      ...altFullArts.map(c=>normalize(c,'Alternate Full Art','AFA')),
       ...altSecrets.map(c=>normalize(c,'Alternate Art Secret','AAS')),
+      ...rainbowSecrets.map(c=>normalize(c,'Rainbow / Secret','RAINBOW')),
       ...goldHyper.map(c=>normalize(c,'Hyper Rare (Gold)','GOLD')),
-      ...goldMega.map(c=>normalize(c,'Mega Hyper Rare (Gold)','GOLD'))
+      ...goldMega.map(c=>normalize(c,'Mega Hyper Rare (Gold)','GOLD')),
+      ...irs.map(c=>normalize(c,'Illustration Rare','IR')),
+      ...sirs.map(c=>normalize(c,'Special Illustration Rare','SIR'))
     ];
     for(const set of fullSets){
       const n=set.name||''; if(!/trainer gallery|galarian gallery/i.test(n)) continue;
       const code=/galarian gallery/i.test(n)?'GG':'TG'; const label=code==='GG'?'Galarian Gallery':'Trainer Gallery';
       for(const c of (set.cards||[])) cards.push(normalize(c,label,code,set));
     }
-    const priority={IR:1,SIR:2,TG:3,GG:4,AAS:5,GOLD:6}; const byId=new Map();
+    const priority={FA:1,AFA:2,AAS:3,RAINBOW:4,TG:5,GG:6,GOLD:7,IR:8,SIR:9}; const byId=new Map();
     for(const c of cards){const old=byId.get(c.id);if(!old||priority[c.categoryCode]>priority[old.categoryCode])byId.set(c.id,c)}
     state.cards=[...byId.values()].filter(c=>{if(!c.set?.releaseDate)return true;const t=parseReleaseDate(c.set.releaseDate);return t&&t<=CUTOFF.getTime()}).sort((a,b)=>{const da=parseReleaseDate(a.set?.releaseDate),db=parseReleaseDate(b.set?.releaseDate);if(da!==db)return db-da;return String(a.number).localeCompare(String(b.number),undefined,{numeric:true})});
     state.allOrder=[...state.cards].sort(()=>Math.random()-.5).map(c=>c.id);
@@ -399,10 +499,10 @@ function renderDashboard(){
  for(const c of state.cards){const k=c.set?.id||c.set?.name;if(!sets.has(k))sets.set(k,[]);sets.get(k).push(c)}
  const mastered=[...sets.values()].filter(cs=>cs.length&&cs.every(c=>isOwned(c.id))).length;
  $('#dashboard').innerHTML=`
- <div class="v11-stat"><div class="v11-stat-icon">▣</div><div class="v11-stat-value">${total.toLocaleString()}</div><div class="v11-stat-label">Total Cards</div><div class="v11-stat-sub">master tracker</div></div>
+ <div class="v11-stat"><div class="v11-stat-icon">◫</div><div class="v11-stat-value">${total.toLocaleString()}</div><div class="v11-stat-label">Total Cards</div><div class="v11-stat-sub">master tracker</div></div>
  <div class="v11-stat"><div class="v11-stat-icon">✓</div><div class="v11-stat-value">${owned.toLocaleString()}</div><div class="v11-stat-label">Owned</div><div class="v11-stat-sub">${pct}% complete</div></div>
- <div class="v11-stat"><div class="v11-stat-icon">◔</div><div class="v11-stat-value">${remaining.toLocaleString()}</div><div class="v11-stat-label">Remaining</div><div class="v11-stat-sub">${100-pct}% left</div></div>
- <div class="v11-stat"><div class="v11-stat-icon">≋</div><div class="v11-stat-value">${mastered}/${sets.size}</div><div class="v11-stat-label">Sets Mastered</div><div class="v11-stat-sub">completed expansions</div></div>`;
+ <div class="v11-stat"><div class="v11-stat-icon">○</div><div class="v11-stat-value">${remaining.toLocaleString()}</div><div class="v11-stat-label">Remaining</div><div class="v11-stat-sub">${100-pct}% left</div></div>
+ <div class="v11-stat"><div class="v11-stat-icon">◆</div><div class="v11-stat-value">${mastered}/${sets.size}</div><div class="v11-stat-label">Sets Mastered</div><div class="v11-stat-sub">completed expansions</div></div>`;
  $('#dashboard').hidden=false;
 }
 function cardHTML(c){const own=isOwned(c.id),cls=categoryClass(c);const img=c.images?.small||c.images?.large||'';return `<article class="card ${own?'owned':''} card-click" data-id="${esc(c.id)}" tabindex="0" role="button"><img loading="lazy" src="${esc(img)}" alt="${esc(c.name)} - ${esc(c.set?.name)} #${esc(c.number)}" /><h3>${esc(c.name)}</h3><p>#${esc(c.number)} · ${esc(c.set?.name)}</p><span class="rarity-pill ${cls}">${esc(categoryCode(c))}</span><button class="owned-toggle ${own?'on':''}" data-owned-action="1">${own?'✓ Owned':'Mark Owned'}</button></article>`}
@@ -432,12 +532,6 @@ function render(){
  }else{
    $('#sortSelect').style.visibility='visible';
 
-   if(['fa','afa','rainbow'].includes(state.filter)){
-     const names={fa:'Full Art',afa:'Alt Full Art',rainbow:'Rainbow/Secret'};
-     $('#app').innerHTML=`<div class="v11-category-note"><strong>${names[state.filter]}</strong> is in the tracker navigation, but the card list is intentionally not populated yet. We’re curating this category instead of misclassifying cards from the API.</div>`;
-     renderDashboard();renderStats();return;
-   }
-
    const groups=new Map();
    for(const c of cards){
      const k=c.set?.id||c.set?.name||'Unknown';
@@ -453,8 +547,8 @@ function render(){
    if(state.openSetId&&!orderedGroups.some(g=>g.id===state.openSetId))state.openSetId=null;
 
    let html='';
-   const order=['IR','SIR','TG','GG','AAS','GOLD'];
-   const headings={IR:'★ Illustration Rares',SIR:'★★ Special Illustration Rares',TG:'Trainer Gallery',GG:'Galarian Gallery',AAS:'Alternate Art Secret',GOLD:'Gold Cards'};
+   const order=['FA','AFA','AAS','RAINBOW','TG','GG','GOLD','IR','SIR'];
+   const headings={FA:'Full Art',AFA:'Alternate Full Art',AAS:'Alternate Art Secret',RAINBOW:'Rainbow / Secret',TG:'Trainer Gallery',GG:'Galarian Gallery',GOLD:'Gold Cards',IR:'★ Illustration Rares',SIR:'★★ Special Illustration Rares'};
 
    for(const {id,set,cards:raw} of orderedGroups){
      const cs=[...raw].sort((a,b)=>String(a.number).localeCompare(String(b.number),undefined,{numeric:true}));
@@ -512,11 +606,6 @@ $('#exportBtn').onclick=()=>{const owned=state.cards.filter(c=>isOwned(c.id)).ma
 $('#importBtn').onclick=()=>$('#importFile').click();
 $('#importFile').addEventListener('change',async e=>{const f=e.target.files?.[0];if(!f)return;try{const j=JSON.parse(await f.text());if(!Array.isArray(j.owned))throw new Error('Invalid collection file');for(const c of state.cards)setOwned(c.id,j.owned.includes(c.id));render()}catch(err){alert('Could not import collection: '+err.message)}finally{e.target.value=''}});
 
-$('#navHome').onclick=()=>{setFilter('all');window.scrollTo({top:0,behavior:'smooth'})};
-$('#navSets').onclick=()=>{setFilter('ir');document.querySelector('.v11-tabs')?.scrollIntoView({behavior:'smooth',block:'start'})};
-$('#navCollection').onclick=()=>{$('#dashboard')?.scrollIntoView({behavior:'smooth',block:'start'})};
-$('#navSearch').onclick=()=>{$('#search').focus();window.scrollTo({top:document.querySelector('.v11-command').offsetTop-8,behavior:'smooth'})};
-$('#navMore').onclick=()=>{const d=document.querySelector('.v11-data-tools');if(d){d.open=true;d.scrollIntoView({behavior:'smooth',block:'center'})}};
 
 load();
 </script>
