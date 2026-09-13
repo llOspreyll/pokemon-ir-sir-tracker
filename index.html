@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Pokémon Special Art Master Tracker</title>
-<meta name="app-version" content="v16" />
+<meta name="app-version" content="v17" />
 <style>
 :root{
   --bg:#0d1020; --panel:#151a31; --panel2:#1d2442; --ink:#f4f7ff; --muted:#aeb9d9;
@@ -710,7 +710,7 @@ function setFilter(f){
  ['all','fa','afa','aas','tg','gg','gold','ir','sir'].forEach(x=>$('#'+x+'Btn').classList.toggle('active',x===f));
  render()
 }
-$('#allBtn').onclick=()=>setFilter('all');$('#faBtn').onclick=()=>setFilter('fa');$('#afaBtn').onclick=()=>setFilter('afa');$('#rainbowBtn').onclick=()=>setFilter('rainbow');$('#irBtn').onclick=()=>setFilter('ir');$('#sirBtn').onclick=()=>setFilter('sir');$('#tgBtn').onclick=()=>setFilter('tg');$('#ggBtn').onclick=()=>setFilter('gg');$('#aasBtn').onclick=()=>setFilter('aas');$('#goldBtn').onclick=()=>setFilter('gold');
+$('#allBtn').onclick=()=>setFilter('all');$('#faBtn').onclick=()=>setFilter('fa');$('#afaBtn').onclick=()=>setFilter('afa');$('#irBtn').onclick=()=>setFilter('ir');$('#sirBtn').onclick=()=>setFilter('sir');$('#tgBtn').onclick=()=>setFilter('tg');$('#ggBtn').onclick=()=>setFilter('gg');$('#aasBtn').onclick=()=>setFilter('aas');$('#goldBtn').onclick=()=>setFilter('gold');
 $('#sortSelect').onchange=e=>{state.sort=e.target.value;render()};
 $('#randomBtn').onclick=()=>{const missing=state.cards.filter(c=>!isOwned(c.id));if(!missing.length){alert('You own every card in the tracker. Absolute menace.');return}const c=missing[Math.floor(Math.random()*missing.length)];state.openSetId=c.set?.id||c.set?.name;render();requestAnimationFrame(()=>requestAnimationFrame(()=>{document.querySelector(`.card[data-id="${CSS.escape(c.id)}"]`)?.scrollIntoView({behavior:'smooth',block:'center'});openCardModal(c.id)}))};
 $('#modalClose').onclick=closeCardModal;$('#cardModal').addEventListener('click',e=>{if(e.target===$('#cardModal'))closeCardModal()});document.addEventListener('keydown',e=>{if(e.key==='Escape')closeCardModal()});
