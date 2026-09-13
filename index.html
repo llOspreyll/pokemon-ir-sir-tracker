@@ -4,6 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Pokémon TCG IR & SIR Master Catalog</title>
+<meta name="app-version" content="v4" />
 <style>
 :root{
   --bg:#0d1020; --panel:#151a31; --panel2:#1d2442; --ink:#f4f7ff; --muted:#aeb9d9;
@@ -99,6 +100,22 @@ function findSet(cardId, sets){
   return sets.find(s=>cardId.startsWith(s.id+'-')) || null;
 }
 function imageURL(base){return base ? `${base}/high.webp` : ''}
+function parseReleaseDate(value){
+  if(!value) return 0;
+  const raw=String(value).trim();
+  // TCGdex commonly returns DD/MM/YYYY; also accept YYYY-MM-DD and similar.
+  let m=raw.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
+  if(m) return new Date(Number(m[3]),Number(m[2])-1,Number(m[1])).getTime();
+  m=raw.match(/^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})$/);
+  if(m) return new Date(Number(m[1]),Number(m[2])-1,Number(m[3])).getTime();
+  const t=Date.parse(raw);
+  return Number.isNaN(t)?0:t;
+}
+function displayReleaseDate(value){
+  const t=parseReleaseDate(value);
+  if(!t) return value||'';
+  return new Intl.DateTimeFormat('en-US',{year:'numeric',month:'short',day:'numeric'}).format(new Date(t));
+}
 async function load(){
   try{
     const [irs,sirs,sets]=await Promise.all([
@@ -114,11 +131,11 @@ async function load(){
     state.cards=[...irs.map(c=>normalize(c,'Illustration Rare')),...sirs.map(c=>normalize(c,'Special Illustration Rare'))].filter(c=>{
       if(seen.has(c.id)) return false; seen.add(c.id);
       if(!c.set?.releaseDate) return true;
-      const d=new Date(String(c.set.releaseDate).replaceAll('/','-'));
-      return !Number.isNaN(d.getTime()) && d<=CUTOFF;
+      const t=parseReleaseDate(c.set.releaseDate);
+      return t && t<=CUTOFF.getTime();
     }).sort((a,b)=>{
-      const da=a.set?.releaseDate||'', db=b.set?.releaseDate||'';
-      if(da!==db) return db.localeCompare(da);
+      const da=parseReleaseDate(a.set?.releaseDate), db=parseReleaseDate(b.set?.releaseDate);
+      if(da!==db) return db-da;
       return String(a.number).localeCompare(String(b.number),undefined,{numeric:true});
     });
     $('#loading').remove(); render();
@@ -150,8 +167,8 @@ function render(){
   const groups=new Map();
   for(const c of cards){const k=c.set?.id||c.set?.name||'Unknown';if(!groups.has(k)) groups.set(k,{id:k,set:c.set,cards:[]});groups.get(k).cards.push(c)}
   const orderedGroups=[...groups.values()].sort((a,b)=>{
-    const da=a.set?.releaseDate||'', db=b.set?.releaseDate||'';
-    if(da!==db) return db.localeCompare(da);
+    const da=parseReleaseDate(a.set?.releaseDate), db=parseReleaseDate(b.set?.releaseDate);
+    if(da!==db) return db-da;
     return String(a.set?.name||'').localeCompare(String(b.set?.name||''));
   });
   if(state.openSetId && !orderedGroups.some(g=>g.id===state.openSetId)) state.openSetId=null;
@@ -161,7 +178,7 @@ function render(){
     const ir=cs.filter(c=>c.rarity==='Illustration Rare'), sir=cs.filter(c=>c.rarity==='Special Illustration Rare');
     const ownedSet=cs.filter(c=>isOwned(c.id)).length, pctSet=cs.length?Math.round(ownedSet/cs.length*100):0;
     const open=state.openSetId===id;
-    html+=`<section class="set" data-set-id="${esc(id)}"><div class="set-head" role="button" tabindex="0" aria-expanded="${open}"><div><h2 class="set-title">${esc(set?.name||'Unknown Set')}</h2><div class="set-meta">${esc(set?.series||'')} · ${esc(set?.releaseDate||'')} · ${ownedSet}/${cs.length} owned (${pctSet}%)</div><div class="set-progress"><span style="width:${pctSet}%"></span></div></div><div class="counts"><span class="count ir">${ir.length} IR</span><span class="count sir">${sir.length} SIR</span><span class="count">${cs.length} total</span><span class="set-chevron" aria-hidden="true">⌄</span></div></div><div class="set-body ${open?'':'collapsed'}">`;
+    html+=`<section class="set" data-set-id="${esc(id)}"><div class="set-head" role="button" tabindex="0" aria-expanded="${open}"><div><h2 class="set-title">${esc(set?.name||'Unknown Set')}</h2><div class="set-meta">${esc(set?.series||'')} · ${esc(displayReleaseDate(set?.releaseDate))} · ${ownedSet}/${cs.length} owned (${pctSet}%)</div><div class="set-progress"><span style="width:${pctSet}%"></span></div></div><div class="counts"><span class="count ir">${ir.length} IR</span><span class="count sir">${sir.length} SIR</span><span class="count">${cs.length} total</span><span class="set-chevron" aria-hidden="true">⌄</span></div></div><div class="set-body ${open?'':'collapsed'}">`;
     if(ir.length) html+=`<h3 class="rarity-heading ir">★ Illustration Rares</h3><div class="grid">${ir.map(cardHTML).join('')}</div>`;
     if(sir.length) html+=`<h3 class="rarity-heading sir">★★ Special Illustration Rares</h3><div class="grid">${sir.map(cardHTML).join('')}</div>`;
     html+='</div></section>';
@@ -169,7 +186,7 @@ function render(){
   $('#app').innerHTML=html||'<div class="empty">No cards match your current filters.</div>';
   const total=state.cards.length, owned=state.cards.filter(c=>isOwned(c.id)).length;
   $('#stats').textContent=`Showing ${cards.length} / ${total} · Owned ${owned}`;
-  document.querySelectorAll('.set-head').forEach(h=>{const toggle=()=>{const id=h.closest('.set').dataset.setId;state.openSetId=state.openSetId===id?null:id;render()};h.addEventListener('click',toggle);h.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle()}})});
+  document.querySelectorAll('.set-head').forEach(h=>{const toggle=()=>{const id=h.closest('.set').dataset.setId;const opening=state.openSetId!==id;state.openSetId=opening?id:null;render();if(opening){requestAnimationFrame(()=>{const target=document.querySelector(`.set[data-set-id=\"${CSS.escape(id)}\"]`);if(target){const sticky=document.querySelector('.toolbar-wrap');const offset=(sticky?.offsetHeight||0)+8;const top=target.getBoundingClientRect().top+window.scrollY-offset;window.scrollTo({top,behavior:'smooth'});}})}};h.addEventListener('click',toggle);h.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle()}})});
   document.querySelectorAll('.check').forEach(ch=>ch.addEventListener('change',e=>{
     const card=e.target.closest('.card'); setOwned(card.dataset.id,e.target.checked); card.classList.toggle('owned',e.target.checked); renderStats(); if(state.missing) render();
   }));
