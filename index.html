@@ -428,7 +428,9 @@ function cardImageFallbacks(card,setId,code){
 }
 function setLogoFallbacks(set,setId,code){
   const galleryLogo=(code==='TG'||code==='GG')?galleryParentLogo(setId):'';
+  const temporalForcesLogo=String(setId||'').toLowerCase()==='sv05' ? pokemonTcgSetLogo(setId) : '';
   return uniq([
+    temporalForcesLogo,
     assetURL(set?.logo),
     assetURL(galleryLogo),
     assetURL(subsetParentLogo(setId)),
